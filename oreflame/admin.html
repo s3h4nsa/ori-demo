@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Operations Board - Oriflame LK</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f7f8f5;
+    --surface:#ffffff;
+    --ink:#111712;
+    --muted:#6f7b72;
+    --line:#e1e5dc;
+    --soft:#eff2ea;
+    --black:#141414;
+    --green:#9fcf78;
+    --green-soft:#dff1c9;
+    --amber:#b88719;
+    --amber-soft:#fff5d9;
+    --red:#b91c1c;
+    --red-soft:#fef2f2;
+    --blue:#2563eb;
+    --blue-soft:#eff6ff;
+    --radius:16px;
+    --radius-sm:10px;
+    --sidebar:248px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:'Plus Jakarta Sans', system-ui, sans-serif;
+    color:var(--ink);
+    background:var(--bg);
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit; text-decoration:none;}
+  button,input,select,textarea{font-family:inherit;}
+  button{cursor:pointer;}
+  img{display:block; max-width:100%;}
+  .app{min-height:100vh;}
+  .admin-locked .app{display:none;}
+  .admin-lock{
+    position:fixed; inset:0; z-index:100; display:none; place-items:center;
+    background:linear-gradient(135deg,#f7f8f5,#eff2ea); padding:20px;
+  }
+  .admin-locked .admin-lock{display:grid;}
+  .lock-card{
+    width:min(420px,100%); background:#fff; border:1px solid var(--line);
+    border-radius:16px; padding:24px; box-shadow:0 24px 70px rgba(17,23,18,.12);
+  }
+  .lock-card h1{font-size:28px; margin:8px 0;}
+  .lock-card p{font-size:13px; color:var(--muted); line-height:1.55; margin-bottom:16px;}
+  .lock-error{display:none; color:var(--red); font-size:12px; font-weight:800; margin-top:10px;}
+  .lock-error.active{display:block;}
+  .sidebar{
+    background:#111712; color:#fff; padding:20px;
+    display:flex; flex-direction:column; gap:22px;
+  }
+  .brand{display:flex; align-items:center; gap:10px; font-size:18px; font-weight:800;}
+  .brand-dot{width:10px; height:10px; border-radius:50%; background:linear-gradient(135deg,var(--green-soft),var(--green));}
+  .role-pill{
+    display:inline-flex; width:max-content; border:1px solid rgba(255,255,255,.18);
+    border-radius:999px; padding:7px 10px; color:#cfd8ce; font-size:11px; font-weight:800;
+  }
+  .side-nav{display:grid; gap:6px;}
+  .side-link{
+    min-height:42px; border:none; border-radius:12px; background:transparent; color:#bec8bd;
+    display:flex; align-items:center; justify-content:flex-start; padding:0 12px; font-size:13px; font-weight:800;
+  }
+  .side-link.active,.side-link:hover{background:rgba(255,255,255,.1); color:#fff;}
+  .storefront-link{
+    margin-top:auto; min-height:42px; border-radius:12px; border:1px solid rgba(255,255,255,.18);
+    display:flex; align-items:center; justify-content:center; color:#fff; font-size:13px; font-weight:800;
+    background:transparent;
+  }
+  .storefront-link + .storefront-link{margin-top:0;}
+  .main{padding:20px;}
+  .topbar{
+    display:flex; align-items:flex-start; justify-content:space-between; gap:16px;
+    margin-bottom:18px;
+  }
+  .eyebrow{font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase;}
+  h1{font-size:28px; line-height:1.08; letter-spacing:-.04em; margin-top:4px;}
+  .today{font-size:12.5px; color:var(--muted); font-weight:700; text-align:right;}
+  .metrics{display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:16px;}
+  .metric{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    padding:15px;
+  }
+  .metric span{display:block; color:var(--muted); font-size:11px; font-weight:800; text-transform:uppercase;}
+  .metric strong{display:block; font-size:24px; margin-top:6px;}
+  .metric small{display:block; color:var(--muted); margin-top:4px; font-size:12px;}
+  .view{display:none; gap:16px;}
+  .view.active{display:grid;}
+  .panel{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    overflow:hidden;
+  }
+  .panel-head{
+    display:flex; align-items:center; justify-content:space-between; gap:14px;
+    padding:16px; border-bottom:1px solid var(--line);
+  }
+  .panel-title{font-size:16px; font-weight:800;}
+  .panel-sub{font-size:12px; color:var(--muted); margin-top:3px;}
+  .toolbar{display:flex; gap:8px; flex-wrap:wrap;}
+  .btn{
+    min-height:38px; border-radius:999px; border:1px solid var(--line);
+    background:#fff; color:var(--ink); padding:0 14px; font-size:12px; font-weight:800;
+  }
+  .btn.primary{border-color:var(--black); background:var(--black); color:#fff;}
+  .btn.danger{border:none; background:var(--red-soft); color:var(--red);}
+  .btn.good{border:none; background:var(--green-soft); color:#23471d;}
+  .input,.select,.textarea{
+    width:100%; min-height:40px; border:1px solid var(--line); background:#fff;
+    border-radius:12px; padding:10px 11px; outline:none; font-size:13px;
+  }
+  .textarea{min-height:78px; resize:vertical;}
+  .input:focus,.select:focus,.textarea:focus{border-color:var(--green); box-shadow:0 0 0 3px var(--green-soft);}
+  .filters{display:grid; gap:10px; padding:14px; border-bottom:1px solid var(--line); background:var(--soft);}
+  .grid-form{display:grid; gap:10px; padding:14px; border-bottom:1px solid var(--line); background:var(--soft);}
+  .field{display:grid; gap:6px;}
+  .field label{font-size:11px; font-weight:800; color:#48534b; text-transform:uppercase;}
+  .queue{display:grid;}
+  .order-card,.pay-card,.stock-row,.customer-row,.task-row{
+    padding:16px; border-bottom:1px solid var(--line); display:grid; gap:12px;
+  }
+  .order-card:last-child,.pay-card:last-child,.stock-row:last-child,.customer-row:last-child,.task-row:last-child{border-bottom:none;}
+  .row-top{display:flex; justify-content:space-between; gap:12px; align-items:flex-start;}
+  .strong{font-weight:800;}
+  .meta{font-size:12.5px; color:var(--muted); line-height:1.55; margin-top:4px;}
+  .badge{
+    display:inline-flex; align-items:center; min-height:28px; padding:0 10px;
+    border-radius:999px; font-size:11px; font-weight:800; white-space:nowrap;
+    background:var(--soft); color:#3e4a42;
+  }
+  .badge.pay{background:var(--amber-soft); color:var(--amber);}
+  .badge.ok{background:var(--green-soft); color:#23471d;}
+  .badge.blue{background:var(--blue-soft); color:var(--blue);}
+  .badge.red{background:var(--red-soft); color:var(--red);}
+  .pipeline{display:grid; grid-template-columns:repeat(6,1fr); gap:6px;}
+  .pipe-step{height:7px; border-radius:999px; background:var(--line);}
+  .pipe-step.done{background:var(--black);}
+  .actions{display:flex; gap:8px; flex-wrap:wrap;}
+  .stock-row{grid-template-columns:58px 1fr; align-items:center;}
+  .thumb{width:58px; height:58px; object-fit:contain; border-radius:12px; background:var(--soft); padding:6px;}
+  .stock-tools{display:flex; gap:8px; flex-wrap:wrap;}
+  .qty-box{display:flex; align-items:center; gap:6px;}
+  .qty-box .input{width:82px;}
+  .empty{padding:30px 16px; color:var(--muted); text-align:center; font-size:13px;}
+  @media (min-width:900px){
+    .app{display:grid; grid-template-columns:var(--sidebar) 1fr;}
+    .sidebar{position:sticky; top:0; min-height:100vh;}
+    .main{padding:28px;}
+    h1{font-size:36px;}
+    .metrics{grid-template-columns:repeat(5,1fr);}
+    .view.orders-view.active{grid-template-columns:minmax(0,1.4fr) minmax(320px,.6fr);}
+    .view.inventory-view.active{grid-template-columns:minmax(0,1fr);}
+    .filters{grid-template-columns:1fr 180px 180px;}
+    .grid-form{grid-template-columns:repeat(6,1fr); align-items:end;}
+    .field.wide{grid-column:span 2;}
+    .stock-row{grid-template-columns:72px minmax(0,1fr) auto; align-items:center;}
+    .thumb{width:72px; height:72px;}
+  }
+</style>
+</head>
+<body class="admin-locked">
+<div class="admin-lock" id="adminLock">
+  <form class="lock-card" id="adminLockForm">
+    <div class="eyebrow">Authorized access</div>
+    <h1>Operations login</h1>
+    <p>Enter the admin PIN to manage orders, payments and inventory.</p>
+    <div class="field">
+      <label for="adminPin">Staff PIN</label>
+      <input class="input" id="adminPin" type="password" inputmode="numeric" autocomplete="current-password" required>
+    </div>
+    <button class="btn primary" type="submit" style="width:100%; margin-top:14px;">Unlock board</button>
+    <div class="lock-error" id="adminLockError">Incorrect PIN. Please try again.</div>
+  </form>
+</div>
+<div class="app">
+  <aside class="sidebar">
+    <div>
+      <div class="brand"><span class="brand-dot"></span>Oriflame Ops</div>
+      <div class="role-pill">Solo operator board</div>
+    </div>
+    <nav class="side-nav">
+      <button class="side-link active" data-view="orders" type="button">Order queue</button>
+      <button class="side-link" data-view="payments" type="button">Payment desk</button>
+      <button class="side-link" data-view="inventory" type="button">Inventory</button>
+      <button class="side-link" data-view="customers" type="button">Customers</button>
+    </nav>
+    <button class="storefront-link" id="adminLogoutBtn" type="button">Sign out</button>
+    <a class="storefront-link" href="index.html">Open storefront</a>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">50-100 customer local shop</div>
+        <h1>Operations command board</h1>
+      </div>
+      <div class="today" id="todayText"></div>
+    </header>
+
+    <section class="metrics">
+      <div class="metric"><span>Open orders</span><strong id="mOpen">0</strong><small>Not completed</small></div>
+      <div class="metric"><span>Need payment</span><strong id="mPay">0</strong><small>Bank/app proof</small></div>
+      <div class="metric"><span>To pack</span><strong id="mPack">0</strong><small>Confirmed orders</small></div>
+      <div class="metric"><span>Low stock</span><strong id="mLow">0</strong><small>3 units or less</small></div>
+      <div class="metric"><span>Customers</span><strong id="mCustomers">0</strong><small>From order records</small></div>
+    </section>
+
+    <section class="view orders-view active" id="ordersView">
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Live order queue</div>
+            <div class="panel-sub">Move orders through confirmation, payment, packing and dispatch.</div>
+          </div>
+          <button class="btn primary" id="demoOrderBtn" type="button">Create phone order</button>
+        </div>
+        <div class="filters">
+          <input class="input" id="orderSearch" placeholder="Search order, customer or phone">
+          <select class="select" id="statusFilter"></select>
+          <select class="select" id="ownerFilter"></select>
+        </div>
+        <div class="queue" id="ordersList"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Owner summary</div>
+            <div class="panel-sub">Everything is handled by one operator.</div>
+          </div>
+        </div>
+        <div class="queue" id="workloadList"></div>
+      </div>
+    </section>
+
+    <section class="view" id="paymentsView">
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Payment verification desk</div>
+            <div class="panel-sub">Bank transfers and app payments wait here before packing.</div>
+          </div>
+        </div>
+        <div class="queue" id="paymentsList"></div>
+      </div>
+    </section>
+
+    <section class="view inventory-view" id="inventoryView">
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Inventory control</div>
+            <div class="panel-sub">Add, edit, remove, adjust stock and mark availability.</div>
+          </div>
+          <button class="btn" id="resetInventoryBtn" type="button">Restore default stock</button>
+        </div>
+        <form class="grid-form" id="productForm">
+          <input type="hidden" id="editSlug">
+          <div class="field wide">
+            <label for="pName">Product</label>
+            <input class="input" id="pName" required placeholder="Eau de Parfum">
+          </div>
+          <div class="field">
+            <label for="pBrand">Brand</label>
+            <input class="input" id="pBrand" required placeholder="Oriflame">
+          </div>
+          <div class="field">
+            <label for="pCat">Category</label>
+            <select class="select" id="pCat">
+              <option>Fragrance</option>
+              <option>Makeup</option>
+              <option>Hair</option>
+              <option>Skincare</option>
+              <option>Bath & Body</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="pPrice">Price</label>
+            <input class="input" id="pPrice" required placeholder="Rs. 1,999">
+          </div>
+          <div class="field">
+            <label for="pStock">Stock</label>
+            <input class="input" id="pStock" required type="number" min="0" value="10">
+          </div>
+          <div class="field wide">
+            <label for="pImage">Image</label>
+            <input class="input" id="pImage" required placeholder="productImage.webp">
+          </div>
+          <div class="field">
+            <label for="pStatus">Status</label>
+            <select class="select" id="pStatus">
+              <option>Active</option>
+              <option>Low stock</option>
+              <option>Out of stock</option>
+              <option>Hidden</option>
+            </select>
+          </div>
+          <button class="btn primary" id="saveProductBtn" type="submit">Save item</button>
+        </form>
+        <div class="queue" id="inventoryList"></div>
+      </div>
+    </section>
+
+    <section class="view" id="customersView">
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Customer records</div>
+            <div class="panel-sub">Built from order history for follow-ups and repeat orders.</div>
+          </div>
+        </div>
+        <div class="queue" id="customersList"></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  const ADMIN_PIN = '2510';
+  const ADMIN_SESSION_KEY = 'oriflameAdminUnlocked';
+  const ORDER_KEY = 'oriflameOrders';
+  const INVENTORY_KEY = 'oriflameInventory';
+  const INVENTORY_VERSION_KEY = 'oriflameInventoryVersion';
+  const INVENTORY_VERSION = '2';
+  const staff = ['Owner'];
+  const statuses = ['New', 'WhatsApp confirmed', 'Payment pending', 'Payment verified', 'Packing', 'Ready for dispatch', 'Completed'];
+  const sampleInventory = [
+    {slug:'infinita-edp', brand:'Oriflame - Infinita', name:'Eau de Parfum', cat:'Fragrance', price:'Rs. 1,999', image:'productImage.webp', stock:12, status:'Active'},
+    {slug:'waunt-super-recover-day-cream', brand:'Oriflame', name:'Super Recover Whipped Day Cream', cat:'Skincare', price:'Rs. 1,259', image:'productImage%20(1).webp', stock:8, status:'Active'},
+    {slug:'infinita-you-edp', brand:'Oriflame - InfinitaYou', name:'Eau de Parfum', cat:'Fragrance', price:'Rs. 1,999', image:'productImage%20(2).webp', stock:9, status:'Active'},
+    {slug:'milk-honey-conditioner', brand:'Oriflame - Milk & Honey Gold', name:'Nourishing Conditioner', cat:'Hair', price:'Rs. 399', image:'productImage%20(3).webp', stock:0, status:'Out of stock'},
+    {slug:'marshma-love-edt', brand:'Oriflame - MARSHMA-LOVE', name:'Eau de Toilette', cat:'Fragrance', price:'Rs. 1,259', image:'productImage%20(4).webp', stock:7, status:'Active'},
+    {slug:'spring-song-hand-cream', brand:'Oriflame - Spring Song', name:'Hand Cream', cat:'Bath & Body', price:'Rs. 199', image:'productImage%20(5).webp', stock:18, status:'Active'},
+    {slug:'spring-song-shower-gel', brand:'Oriflame - Spring Song', name:'Shower Gel', cat:'Bath & Body', price:'Rs. 299', image:'productImage%20(6).webp', stock:14, status:'Active'},
+    {slug:'the-one-face-glow-styler', brand:'Oriflame - The ONE', name:'Face Glow Styler', cat:'Makeup', price:'Rs. 979', image:'productImage%20(7).webp', stock:3, status:'Low stock'},
+    {slug:'eclat-mystique-edp', brand:'Oriflame - Eclat Mystique', name:'Eau de Parfum', cat:'Fragrance', price:'Rs. 1,899', image:'productImage.jpg', stock:6, status:'Active'},
+    {slug:'eclat-homme-elite-edt', brand:'Oriflame - Eclat Homme Elite', name:'Eau de Toilette', cat:'Fragrance', price:'Rs. 1,699', image:'productImage%20(2).webp', stock:5, status:'Active'},
+    {slug:'the-one-lip-lacquer', brand:'Oriflame - The ONE', name:'Lip Lacquer', cat:'Makeup', price:'Rs. 549', image:'productImage%20(7).webp', stock:10, status:'Active'},
+    {slug:'the-one-eyeshadow-palette', brand:'Oriflame - The ONE', name:'Colour Stylist Eyeshadow Palette', cat:'Makeup', price:'Rs. 899', image:'productImage%20(7).webp', stock:6, status:'Active'},
+    {slug:'the-one-wonder-lash-mascara', brand:'Oriflame - The ONE', name:'Wonder Lash Mascara', cat:'Makeup', price:'Rs. 699', image:'productImage%20(7).webp', stock:9, status:'Active'},
+    {slug:'milk-honey-shampoo', brand:'Oriflame - Milk & Honey Gold', name:'Nourishing Shampoo', cat:'Hair', price:'Rs. 399', image:'productImage%20(3).webp', stock:13, status:'Active'},
+    {slug:'hair-x-strengthening-treatment', brand:'Oriflame - Hair X', name:'Strengthening Treatment', cat:'Hair', price:'Rs. 649', image:'productImage%20(3).webp', stock:8, status:'Active'},
+    {slug:'novage-ultimate-lift-serum', brand:'Oriflame - NovAge', name:'Ultimate Lift Serum', cat:'Skincare', price:'Rs. 2,499', image:'productImage%20(1).webp', stock:4, status:'Active'},
+    {slug:'optimals-even-out-serum', brand:'Oriflame - Optimals', name:'Even Out Advanced Serum', cat:'Skincare', price:'Rs. 1,499', image:'productImage%20(1).webp', stock:7, status:'Active'},
+    {slug:'nature-secrets-argan-body-butter', brand:'Oriflame - Nature Secrets', name:'Argan Oil Body Butter', cat:'Bath & Body', price:'Rs. 579', image:'productImage%20(5).webp', stock:11, status:'Active'},
+    {slug:'nature-secrets-coconut-body-wash', brand:'Oriflame - Nature Secrets', name:'Coconut Water Body Wash', cat:'Bath & Body', price:'Rs. 449', image:'productImage%20(6).webp', stock:12, status:'Active'}
+  ];
+
+  function read(key, fallback){
+    try { return JSON.parse(localStorage.getItem(key)) || fallback; }
+    catch { return fallback; }
+  }
+  function write(key, value){ localStorage.setItem(key, JSON.stringify(value)); }
+  function slugify(text){ return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `item-${Date.now()}`; }
+  function unlockAdmin(){
+    sessionStorage.setItem(ADMIN_SESSION_KEY, 'true');
+    document.body.classList.remove('admin-locked');
+  }
+  if (sessionStorage.getItem(ADMIN_SESSION_KEY) === 'true') unlockAdmin();
+  function money(value){ return `Rs. ${Number(value || 0).toLocaleString('en-US')}`; }
+  function getOrders(){ return read(ORDER_KEY, []).map(normalizeOrder); }
+  function saveOrders(orders){ write(ORDER_KEY, orders); }
+  function getInventory(){
+    const saved = read(INVENTORY_KEY, null);
+    if (saved) {
+      if (localStorage.getItem(INVENTORY_VERSION_KEY) !== INVENTORY_VERSION) {
+        const existingSlugs = new Set(saved.map(item => item.slug));
+        const merged = [...saved, ...sampleInventory.filter(item => !existingSlugs.has(item.slug))];
+        write(INVENTORY_KEY, merged);
+        localStorage.setItem(INVENTORY_VERSION_KEY, INVENTORY_VERSION);
+        return merged;
+      }
+      return saved;
+    }
+    write(INVENTORY_KEY, sampleInventory);
+    localStorage.setItem(INVENTORY_VERSION_KEY, INVENTORY_VERSION);
+    return sampleInventory;
+  }
+  function saveInventory(items){ write(INVENTORY_KEY, items); }
+  function normalizeOrder(order){
+    const payment = order.payment || {method:'whatsapp', label:'Decide on WhatsApp'};
+    let status = order.status || 'New';
+    if (status === 'Pending payment') status = 'Payment pending';
+    return {...order, status, owner: order.owner || 'Owner', payment, stockAdjusted: Boolean(order.stockAdjusted)};
+  }
+  function applyOrderStock(order, direction){
+    if (!order || !Array.isArray(order.items)) return;
+    const inventory = getInventory();
+    order.items.forEach(item => {
+      const product = inventory.find(entry => entry.slug === item.slug);
+      if (!product) return;
+      const qty = Number(item.qty || 0);
+      if (!qty) return;
+      const nextStock = direction === 'reduce' ? Number(product.stock || 0) - qty : Number(product.stock || 0) + qty;
+      product.stock = Math.max(0, nextStock);
+      if (product.stock <= 0) {
+        product.status = 'Out of stock';
+      } else if (product.stock <= 3) {
+        product.status = 'Low stock';
+      } else {
+        product.status = 'Active';
+      }
+    });
+    saveInventory(inventory);
+  }
+  function orderPaymentLabel(order){
+    const payment = order.payment || {};
+    return `${payment.label || 'Payment not selected'}${payment.bank ? ` - ${payment.bank}` : ''}${payment.app ? ` - ${payment.app}` : ''}${payment.reference ? ` - Ref ${payment.reference}` : ''}`;
+  }
+  function customerKey(order){ return `${order.customer?.phone || ''}-${order.customer?.name || ''}`; }
+
+  function setupSelects(){
+    document.getElementById('statusFilter').innerHTML = ['All statuses', ...statuses].map(item => `<option>${item}</option>`).join('');
+    document.getElementById('ownerFilter').innerHTML = ['All owners', ...staff].map(item => `<option>${item}</option>`).join('');
+  }
+  function renderMetrics(){
+    const orders = getOrders();
+    const inventory = getInventory();
+    const customers = new Set(orders.map(customerKey).filter(Boolean));
+    document.getElementById('mOpen').textContent = orders.filter(o => o.status !== 'Completed').length;
+    document.getElementById('mPay').textContent = orders.filter(o => o.status === 'Payment pending').length;
+    document.getElementById('mPack').textContent = orders.filter(o => o.status === 'Payment verified').length;
+    document.getElementById('mLow').textContent = inventory.filter(item => Number(item.stock) <= 3 || item.status === 'Low stock').length;
+    document.getElementById('mCustomers').textContent = customers.size;
+  }
+  function renderOrders(){
+    const query = document.getElementById('orderSearch').value.trim().toLowerCase();
+    const status = document.getElementById('statusFilter').value;
+    const owner = document.getElementById('ownerFilter').value;
+    const orders = getOrders().filter(order => {
+      const haystack = `${order.id} ${order.customer?.name || ''} ${order.customer?.phone || ''}`.toLowerCase();
+      return (!query || haystack.includes(query))
+        && (status === 'All statuses' || order.status === status)
+        && (owner === 'All owners' || order.owner === owner);
+    });
+    const list = document.getElementById('ordersList');
+    if (!orders.length) {
+      list.innerHTML = '<div class="empty">No matching orders in the queue.</div>';
+      return;
+    }
+    list.innerHTML = orders.map(order => {
+      const idx = Math.max(0, statuses.indexOf(order.status));
+      const items = (order.items || []).map(item => `${item.qty} x ${item.name}`).join(', ');
+      return `
+        <article class="order-card">
+          <div class="row-top">
+            <div>
+              <div class="strong">${order.id}</div>
+              <div class="meta">${order.customer?.name || 'Customer'} - ${order.customer?.phone || 'No phone'} - ${money(order.total)}</div>
+              <div class="meta">${items || 'No line items'}</div>
+              <div class="meta">Payment: ${orderPaymentLabel(order)}</div>
+            </div>
+            <span class="badge ${order.status === 'Payment pending' ? 'pay' : order.status === 'Completed' ? 'ok' : 'blue'}">${order.status}</span>
+          </div>
+          <div class="pipeline">${statuses.slice(0, 6).map((_, step) => `<span class="pipe-step${step <= idx ? ' done' : ''}"></span>`).join('')}</div>
+          <div class="actions">
+            <select class="select" data-owner="${order.id}">${staff.map(name => `<option${name === order.owner ? ' selected' : ''}>${name}</option>`).join('')}</select>
+            ${statuses.map(name => `<button class="btn" data-order-status="${order.id}" data-status="${name}" type="button">${name}</button>`).join('')}
+            <button class="btn danger" data-remove-order="${order.id}" type="button">Remove</button>
+          </div>
+        </article>`;
+    }).join('');
+  }
+  function renderPayments(){
+    const payments = getOrders().filter(order => order.status === 'Payment pending' || order.status === 'Payment verified');
+    const list = document.getElementById('paymentsList');
+    if (!payments.length) {
+      list.innerHTML = '<div class="empty">No bank or app payments waiting right now.</div>';
+      return;
+    }
+    list.innerHTML = payments.map(order => `
+      <article class="pay-card">
+        <div class="row-top">
+          <div>
+            <div class="strong">${order.id} - ${order.customer?.name || 'Customer'}</div>
+            <div class="meta">${orderPaymentLabel(order)}</div>
+            <div class="meta">Amount to verify: ${money(order.total)}</div>
+          </div>
+          <span class="badge ${order.status === 'Payment verified' ? 'ok' : 'pay'}">${order.status}</span>
+        </div>
+        <div class="actions">
+          <button class="btn good" data-order-status="${order.id}" data-status="Payment verified" type="button">Mark verified</button>
+          <button class="btn" data-order-status="${order.id}" data-status="Payment pending" type="button">Need proof</button>
+          <button class="btn primary" data-order-status="${order.id}" data-status="Packing" type="button">Send to packing</button>
+        </div>
+      </article>
+    `).join('');
+  }
+  function renderWorkload(){
+    const orders = getOrders().filter(order => order.status !== 'Completed');
+    const ownerOrders = orders.filter(order => order.owner === 'Owner');
+    document.getElementById('workloadList').innerHTML = `
+      <div class="task-row">
+        <div class="row-top">
+          <div>
+            <div class="strong">Owner</div>
+            <div class="meta">${ownerOrders.length} active orders currently managed</div>
+          </div>
+          <span class="badge">${ownerOrders.length}</span>
+        </div>
+      </div>
+    `;
+  }
+  function renderInventory(){
+    const list = document.getElementById('inventoryList');
+    const items = getInventory();
+    if (!items.length) {
+      list.innerHTML = '<div class="empty">No inventory items yet.</div>';
+      return;
+    }
+    list.innerHTML = items.map(item => `
+      <article class="stock-row">
+        <img class="thumb" src="${item.image}" alt="${item.name}">
+        <div>
+          <div class="strong">${item.name}</div>
+          <div class="meta">${item.brand} - ${item.cat} - ${item.price}</div>
+          <div class="meta">Stock: ${item.stock} - Status: ${item.status}</div>
+        </div>
+        <div class="stock-tools">
+          <div class="qty-box">
+            <input class="input" data-stock-input="${item.slug}" type="number" min="0" value="${item.stock}">
+            <button class="btn" data-stock-save="${item.slug}" type="button">Update</button>
+          </div>
+          <button class="btn" data-edit-product="${item.slug}" type="button">Edit</button>
+          <button class="btn danger" data-remove-product="${item.slug}" type="button">Remove</button>
+        </div>
+      </article>
+    `).join('');
+  }
+  function renderCustomers(){
+    const map = new Map();
+    getOrders().forEach(order => {
+      const key = customerKey(order);
+      if (!key) return;
+      const current = map.get(key) || {name:order.customer?.name, phone:order.customer?.phone, address:order.customer?.address, count:0, total:0, last:''};
+      current.count += 1;
+      current.total += Number(order.total || 0);
+      current.last = order.createdAt || current.last;
+      map.set(key, current);
+    });
+    const customers = [...map.values()];
+    document.getElementById('customersList').innerHTML = customers.length ? customers.map(customer => `
+      <article class="customer-row">
+        <div class="row-top">
+          <div>
+            <div class="strong">${customer.name || 'Customer'}</div>
+            <div class="meta">${customer.phone || 'No phone'} - ${customer.address || 'No address'}</div>
+            <div class="meta">${customer.count} orders - Lifetime value ${money(customer.total)}</div>
+          </div>
+          <span class="badge">Follow up</span>
+        </div>
+      </article>
+    `).join('') : '<div class="empty">Customer records appear after orders are placed.</div>';
+  }
+  function rerender(){
+    renderMetrics();
+    renderOrders();
+    renderPayments();
+    renderWorkload();
+    renderInventory();
+    renderCustomers();
+  }
+  function updateOrder(id, patch){
+    const orders = getOrders();
+    const target = orders.find(order => order.id === id);
+    if (!target) return;
+    const nextStatus = patch.status || target.status;
+    const nextOrders = orders.map(order => {
+      if (order.id !== id) return order;
+      const current = {...order, ...patch};
+      if (nextStatus === 'Payment verified' && !current.stockAdjusted) {
+        applyOrderStock(current, 'reduce');
+        current.stockAdjusted = true;
+      }
+      return current;
+    });
+    saveOrders(nextOrders.map(normalizeOrder));
+    rerender();
+  }
+
+  document.getElementById('todayText').textContent = new Date().toLocaleString('en-LK', {dateStyle:'medium', timeStyle:'short'});
+  document.getElementById('adminLockForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const pin = document.getElementById('adminPin').value.trim();
+    const error = document.getElementById('adminLockError');
+    if (pin === ADMIN_PIN) {
+      error.classList.remove('active');
+      e.target.reset();
+      unlockAdmin();
+      return;
+    }
+    error.classList.add('active');
+  });
+  document.getElementById('adminLogoutBtn').addEventListener('click', () => {
+    sessionStorage.removeItem(ADMIN_SESSION_KEY);
+    document.body.classList.add('admin-locked');
+    document.getElementById('adminPin').focus();
+  });
+  setupSelects();
+  document.querySelectorAll('.side-link').forEach(link => {
+    link.addEventListener('click', () => {
+      document.querySelectorAll('.side-link').forEach(item => item.classList.remove('active'));
+      link.classList.add('active');
+      document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
+      document.getElementById(`${link.dataset.view}View`).classList.add('active');
+    });
+  });
+  ['orderSearch', 'statusFilter', 'ownerFilter'].forEach(id => document.getElementById(id).addEventListener('input', renderOrders));
+  document.body.addEventListener('click', e => {
+    const statusBtn = e.target.closest('[data-order-status]');
+    const removeOrder = e.target.closest('[data-remove-order]');
+    const stockSave = e.target.closest('[data-stock-save]');
+    const editProduct = e.target.closest('[data-edit-product]');
+    const removeProduct = e.target.closest('[data-remove-product]');
+    if (statusBtn) updateOrder(statusBtn.dataset.orderStatus, {status:statusBtn.dataset.status});
+    if (removeOrder) {
+      saveOrders(getOrders().filter(order => order.id !== removeOrder.dataset.removeOrder));
+      rerender();
+    }
+    if (stockSave) {
+      const input = document.querySelector(`[data-stock-input="${stockSave.dataset.stockSave}"]`);
+      saveInventory(getInventory().map(item => item.slug === stockSave.dataset.stockSave ? {...item, stock:Number(input.value), status:Number(input.value) <= 0 ? 'Out of stock' : Number(input.value) <= 3 ? 'Low stock' : 'Active'} : item));
+      rerender();
+    }
+    if (editProduct) {
+      const item = getInventory().find(product => product.slug === editProduct.dataset.editProduct);
+      if (!item) return;
+      document.getElementById('editSlug').value = item.slug;
+      document.getElementById('pName').value = item.name;
+      document.getElementById('pBrand').value = item.brand;
+      document.getElementById('pCat').value = item.cat;
+      document.getElementById('pPrice').value = item.price;
+      document.getElementById('pStock').value = item.stock;
+      document.getElementById('pImage').value = item.image;
+      document.getElementById('pStatus').value = item.status;
+      document.getElementById('saveProductBtn').textContent = 'Update item';
+      window.scrollTo({top:0, behavior:'smooth'});
+    }
+    if (removeProduct) {
+      saveInventory(getInventory().filter(item => item.slug !== removeProduct.dataset.removeProduct));
+      rerender();
+    }
+  });
+  document.body.addEventListener('change', e => {
+    const ownerSelect = e.target.closest('[data-owner]');
+    if (ownerSelect) updateOrder(ownerSelect.dataset.owner, {owner:ownerSelect.value});
+  });
+  document.getElementById('demoOrderBtn').addEventListener('click', () => {
+    const order = {
+      id:`OLK-${Date.now().toString().slice(-6)}`,
+      customer:{name:'Walk-in Customer', phone:'077 000 0000', address:'Colombo'},
+      items:[{slug:'infinita-edp', qty:1, name:'Eau de Parfum', price:'Rs. 1,999'}],
+      total:1999,
+      payment:{method:'bank', label:'Bank transfer', bank:'Commercial Bank', app:'', reference:''},
+      status:'Payment pending',
+      stockAdjusted:false,
+      owner:'Owner',
+      createdAt:new Date().toISOString()
+    };
+    saveOrders([order, ...getOrders()]);
+    rerender();
+  });
+  document.getElementById('productForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const editing = document.getElementById('editSlug').value;
+    const item = {
+      slug: editing || slugify(document.getElementById('pName').value),
+      name: document.getElementById('pName').value.trim(),
+      brand: document.getElementById('pBrand').value.trim(),
+      cat: document.getElementById('pCat').value,
+      price: document.getElementById('pPrice').value.trim(),
+      stock: Number(document.getElementById('pStock').value),
+      image: document.getElementById('pImage').value.trim(),
+      status: document.getElementById('pStatus').value
+    };
+    const inventory = getInventory();
+    saveInventory(editing ? inventory.map(product => product.slug === editing ? item : product) : [item, ...inventory]);
+    e.target.reset();
+    document.getElementById('editSlug').value = '';
+    document.getElementById('saveProductBtn').textContent = 'Save item';
+    rerender();
+  });
+  document.getElementById('resetInventoryBtn').addEventListener('click', () => {
+    saveInventory(sampleInventory);
+    localStorage.setItem(INVENTORY_VERSION_KEY, INVENTORY_VERSION);
+    rerender();
+  });
+  rerender();
+</script>
+</body>
+</html>
