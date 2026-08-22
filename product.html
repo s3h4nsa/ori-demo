@@ -249,10 +249,6 @@
         <button class="icon-btn" aria-label="Wishlist">
           <svg viewBox="0 0 24 24" fill="none" stroke="#141414" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
         </button>
-        <a href="cart.html" class="icon-btn" aria-label="Bag" id="desktopBagBtn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#141414" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-          <span class="badge" id="desktopBagCount">0</span>
-        </a>
       </div>
     </div>
   </header>
@@ -452,13 +448,13 @@
   function saveCart(cart){ localStorage.setItem(CART_KEY, JSON.stringify(cart)); }
   function cartCount(){ return getCart().reduce((sum, item) => sum + item.qty, 0); }
   function updateBag(){
-    document.getElementById('desktopBagCount').textContent = cartCount();
-    document.getElementById('mobileBagCount').textContent = cartCount();
+    const countEl = document.getElementById('mobileBagCount');
+    if (countEl) countEl.textContent = cartCount();
   }
   function animateAddToCart(){
     const img = document.getElementById('productImage');
-    const target = window.innerWidth >= 900 ? document.getElementById('desktopBagBtn') : document.getElementById('mobileBagBtn');
-    const badge = window.innerWidth >= 900 ? document.getElementById('desktopBagCount') : document.getElementById('mobileBagCount');
+    const target = document.getElementById('mobileBagBtn');
+    const badge = document.getElementById('mobileBagCount');
     if (!img || !target) return;
     const from = img.getBoundingClientRect();
     const to = target.getBoundingClientRect();

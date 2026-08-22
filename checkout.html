@@ -594,14 +594,29 @@
     const name = [document.getElementById('fFirst')?.value.trim(), document.getElementById('fLast')?.value.trim()].filter(Boolean).join(' ');
     const phone = document.getElementById('fPhone')?.value.trim();
     const address = document.getElementById('fAddress')?.value.trim();
-    const paymentMethod = document.querySelector('.pay-option.selected .pay-label')?.textContent || 'Direct Bank Transfer';
+    const paymentLabel = document.querySelector('.pay-option.selected .pay-label')?.textContent || 'Direct Bank Transfer';
+    const paymentMethod = paymentLabel.includes('WhatsApp') ? 'whatsapp' : 'bank';
     const summary = totals();
     return {
       id: generateOrderId(),
-      customer: { name, phone, address, email: document.getElementById('fEmail')?.value.trim() },
+      customer: {
+        name,
+        phone,
+        address,
+        email: document.getElementById('fEmail')?.value.trim(),
+        city: document.getElementById('fCity')?.value.trim(),
+        postalCode: document.getElementById('fPostal')?.value.trim(),
+        country: document.getElementById('fCountry')?.value.trim() || 'Sri Lanka'
+      },
       items: cLines.map(l => ({ slug: l.slug, qty: l.qty, name: l.product.name, price: l.product.price })),
       total: summary.total,
-      payment: { method: paymentMethod },
+      payment: {
+        method: paymentMethod,
+        label: paymentLabel,
+        bank: paymentMethod === 'bank' ? 'Commercial Bank' : '',
+        app: paymentMethod === 'whatsapp' ? 'WhatsApp' : '',
+        reference: paymentMethod === 'bank' ? generateOrderId() : ''
+      },
       status,
       stockAdjusted: false,
       createdAt: new Date().toISOString()

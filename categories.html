@@ -207,10 +207,6 @@
         <a href="track.html" class="icon-btn" aria-label="Track order">
           <svg viewBox="0 0 24 24" fill="none" stroke="#141414" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
         </a>
-        <a href="cart.html" class="icon-btn" aria-label="Bag" id="desktopBagBtn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#141414" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-          <span class="badge" id="desktopBagCount">0</span>
-        </a>
       </div>
     </div>
   </header>
@@ -313,9 +309,7 @@
     function updateBagCount(){
       const count = getCart().reduce((sum, item) => sum + Number(item.qty || 0), 0);
       const mobile = document.getElementById('mobileBagCount');
-      const desktop = document.getElementById('desktopBagCount');
       if (mobile) mobile.textContent = count;
-      if (desktop) desktop.textContent = count;
     }
 
     function setCategory(cat){
@@ -423,7 +417,7 @@
           void addBtn.offsetWidth;
           addBtn.classList.add('adding');
           const img = addBtn.closest('.card')?.querySelector('.card-img');
-          const target = document.getElementById('mobileBagBtn') || document.getElementById('desktopBagBtn');
+          const target = document.getElementById('mobileBagBtn');
           if (img && target) {
             const from = img.getBoundingClientRect();
             const to = target.getBoundingClientRect();
