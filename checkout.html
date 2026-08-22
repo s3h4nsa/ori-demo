@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -172,6 +172,28 @@
   }
   .pay-now-btn:hover{opacity:.88;}
 
+  .bottom-nav{
+    position:fixed; bottom:0; left:0; right:0; z-index:60;
+    background:#fff; border-top:1px solid var(--line);
+    display:flex; align-items:center; justify-content:space-around;
+    padding:12px 10px calc(12px + env(safe-area-inset-bottom));
+  }
+  .nav-item{
+    display:flex; flex-direction:column; align-items:center; gap:5px;
+    color:var(--muted); position:relative; background:none; border:none; text-decoration:none;
+  }
+  .nav-item svg{width:22px; height:22px; stroke:var(--muted); fill:none;}
+  .nav-item.active{color:var(--ink);}
+  .nav-item.active svg{stroke:var(--ink);}
+  .nav-item.active::after{
+    content:""; position:absolute; bottom:-9px; width:16px; height:2.5px; background:var(--ink); border-radius:2px;
+  }
+  .nav-item .cart-badge{
+    position:absolute; top:-6px; right:-8px; background:var(--black); color:#fff;
+    font-size:9px; font-weight:700; width:15px; height:15px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+  }
+
   .footer-links a{color:var(--text-dim);text-decoration:none;font-weight:500;}
   .footer-links a:hover{text-decoration:underline;color:var(--text);}
 
@@ -192,7 +214,7 @@
     .cart-icon{right:16px;}
     .cart-icon svg{width:18px;height:18px;}
 
-    .layout{grid-template-columns:1fr;display:flex;flex-direction:column;min-height:0;}
+  .layout{grid-template-columns:1fr;display:flex;flex-direction:column;min-height:0; padding-bottom:72px;}
     .left{border-right:none;padding:20px 16px 40px;order:2;}
     .right{display:none;}
 
@@ -219,6 +241,10 @@
     h2.section-title{font-size:16px;}
     .two-col{gap:10px;}
     .pay-now-btn{padding:15px;}
+  }
+
+  @media (min-width: 901px){
+  .bottom-nav{display:none;}
   }
 </style>
 </head>
@@ -359,6 +385,22 @@
       </div>
 
     </div>
+
+    <nav class="bottom-nav" aria-label="Mobile navigation">
+      <a href="index.html" class="nav-item" aria-label="Home">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h14V10"/></svg>
+      </a>
+      <a href="categories.html" class="nav-item" aria-label="Categories">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="14" y2="17"/></svg>
+      </a>
+      <a href="track.html" class="nav-item" aria-label="Track order">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+      </a>
+      <a href="cart.html" class="nav-item active" aria-label="Bag" id="mobileBagBtn">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        <span class="cart-badge" id="mobileBagCount">0</span>
+      </a>
+    </nav>
 
     <!-- RIGHT: order summary (desktop only) -->
     <div class="right">
@@ -585,6 +627,12 @@
     alert('WhatsApp order opened — we saved the order locally as pending.');
   }
 
+  function updateBagCount(){
+    const count = getCart().reduce((sum, item) => sum + Number(item.qty || 0), 0);
+    const mobileCount = document.getElementById('mobileBagCount');
+    if (mobileCount) mobileCount.textContent = count;
+  }
+
   function showFormWarning(msg){ const w = document.getElementById('formWarning'); if (w){ w.textContent = msg; w.classList.add('show'); } }
   function hideFormWarning(){ const w = document.getElementById('formWarning'); if (w) w.classList.remove('show'); }
 
@@ -597,6 +645,7 @@
   (function init(){
     refreshProducts();
     renderSummaryPanels();
+    updateBagCount();
     ['fEmail','fFirst','fLast','fAddress','fCity','fPhone'].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('input',()=>el.classList.remove('field-error')); });
   })();
 </script>
