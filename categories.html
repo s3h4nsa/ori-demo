@@ -76,7 +76,7 @@
     }
 
     .page{
-      width:calc(100% - 40px); max-width:var(--maxw); margin:0 auto; padding:18px 0 32px;
+      width:100%; max-width:var(--maxw); margin:0 auto; padding:18px 20px 32px;
     }
     .page-head{padding:8px 0 20px;}
     .eyebrow{
@@ -227,7 +227,7 @@
     </div>
   </div>
 
-  <main class="wrap page">
+  <main class="page">
     <section class="page-head">
       <span class="eyebrow">Shop by routine</span>
       <h1>Discover the right category for you</h1>
@@ -257,36 +257,23 @@
   <script>
     const INVENTORY_KEY = 'oriflameInventory';
     const CART_KEY = 'oriflameCart';
-    const CATEGORY_LIST = ['Skincare', 'Makeup', 'Fragrance', 'Hair', 'Bath & Body'];
-    const FALLBACK_CATALOG = [
-      {slug:'infinita-edp', brand:'Oriflame - Infinita', name:'Eau de Parfum', cat:'Fragrance', price:'Rs. 1,999', image:'productImage.webp', stock:12, status:'Active', tag:null, description:'A floral-woody signature scent layered with warm amber and soft musk.', benefits:['Warm amber finish','Lightweight daily wear','Bold yet soft floral notes'], usage:'Spray on pulse points for an elegant all-day finish.'},
-      {slug:'waunt-super-recover-day-cream', brand:'Oriflame', name:'Super Recover Whipped Day Cream', cat:'Skincare', price:'Rs. 1,259', image:'productImage (1).webp', stock:8, status:'Active', tag:null, description:'A rich whipped moisturizer that hydrates and restores a healthy glow.', benefits:['Deep hydration','Comforting texture','Skin barrier support'], usage:'Apply to clean skin each morning for a bright, smooth finish.'},
-      {slug:'infinita-you-edp', brand:'Oriflame - InfinitaYou', name:'Eau de Parfum', cat:'Fragrance', price:'Rs. 1,999', image:'productImage (2).webp', stock:9, status:'Active', tag:null, description:'A warm, confident fragrance that lingers softly while keeping the mood playful and fresh.', benefits:['Soft floral body','Warm woody base','Daily luxury feel'], usage:'Use as a signature scent on neck, wrists and hair.'},
-      {slug:'milk-honey-conditioner', brand:'Oriflame - Milk & Honey Gold', name:'Nourishing Conditioner', cat:'Hair', price:'Rs. 399', image:'productImage (3).webp', stock:0, status:'Out of stock', tag:'OUT OF STOCK', description:'Nourishing conditioner that restores softness and shine without weighing hair down.', benefits:['Softens strands','Adds shine','Helps detangle'], usage:'Apply mid-lengths to ends after shampoo and rinse thoroughly.'},
-      {slug:'marshma-love-edt', brand:'Oriflame - MARSHMA-LOVE', name:'Eau de Toilette', cat:'Fragrance', price:'Rs. 1,259', image:'productImage (4).webp', stock:7, status:'Active', tag:null, description:'A fruity-floral scent that feels bright, youthful and easy to wear.', benefits:['Easy everyday wear','Radiant top notes','Clean, fresh finish'], usage:'Spritz lightly for a fresh daytime signature.'},
-      {slug:'spring-song-hand-cream', brand:'Oriflame - Spring Song', name:'Hand Cream', cat:'Bath & Body', price:'Rs. 199', image:'productImage (5).webp', stock:18, status:'Active', tag:null, description:'A silky hand cream that comforts dry skin with a soft, nourishing finish.', benefits:['Moisturizes dry hands','Lightweight feel','Daily essential'], usage:'Massage into hands as needed throughout the day.'},
-      {slug:'spring-song-shower-gel', brand:'Oriflame - Spring Song', name:'Shower Gel', cat:'Bath & Body', price:'Rs. 299', image:'productImage (6).webp', stock:14, status:'Active', tag:null, description:'A refreshing shower gel that cleanses and leaves skin feeling soft and lightly scented.', benefits:['Gentle cleanse','Soft skin feel','Fresh scent'], usage:'Apply to wet skin, rinse thoroughly and follow with body lotion.'},
-      {slug:'the-one-face-glow-styler', brand:'Oriflame - The ONE', name:'Face Glow Styler', cat:'Makeup', price:'Rs. 979', image:'productImage (7).webp', stock:3, status:'Low stock', tag:'LOW STOCK', description:'A lightweight, blurring primer that melts into skin for a luminous finish under makeup.', benefits:['Instant glow','Smooth base','Makeup-friendly texture'], usage:'Apply before foundation or on bare skin for a soft, radiant finish.'},
-      {slug:'eclat-mystique-edp', brand:'Oriflame - Eclat Mystique', name:'Eau de Parfum', cat:'Fragrance', price:'Rs. 1,899', image:'productImage.jpg', stock:6, status:'Active', tag:null, description:'A layered fragrance with floral elegance and a soft musky trail.', benefits:['Elegant profile','Long-lasting finish','Signature occasion scent'], usage:'Apply to wrists and behind ears for a refined, lasting impression.'},
-      {slug:'eclat-homme-elite-edt', brand:'Oriflame - Eclat Homme Elite', name:'Eau de Toilette', cat:'Fragrance', price:'Rs. 1,699', image:'productImage (2).webp', stock:5, status:'Active', tag:null, description:'Fresh and masculine with citrus brightness and an earthy woody finish.', benefits:['Masculine profile','Fresh opening','Smooth dry down'], usage:'Use after grooming for a clean everyday signature.'},
-      {slug:'the-one-lip-lacquer', brand:'Oriflame - The ONE', name:'Lip Lacquer', cat:'Makeup', price:'Rs. 549', image:'productImage (7).webp', stock:10, status:'Active', tag:null, description:'High-shine lip color with a smooth, cushiony finish and comfortable wear.', benefits:['Glossy finish','Soft texture','Everyday shade'], usage:'Swipe on directly for a plush glossy look.'},
-      {slug:'the-one-eyeshadow-palette', brand:'Oriflame - The ONE', name:'Colour Stylist Eyeshadow Palette', cat:'Makeup', price:'Rs. 899', image:'productImage (7).webp', stock:6, status:'Active', tag:null, description:'A curated palette for easy everyday looks and soft evening definition.', benefits:['Blendable textures','Pigmented shades','Travel-ready compact'], usage:'Use the matte and shimmer tones together for a polished eye look.'},
-      {slug:'the-one-wonder-lash-mascara', brand:'Oriflame - The ONE', name:'Wonder Lash Mascara', cat:'Makeup', price:'Rs. 699', image:'productImage (7).webp', stock:9, status:'Active', tag:null, description:'Curl, lengthen and intensify lashes with a smooth, buildable formula.', benefits:['Lifted look','Buildable volume','Easy everyday wear'], usage:'Sweep from root to tip for soft, lifted lashes.'},
-      {slug:'milk-honey-shampoo', brand:'Oriflame - Milk & Honey Gold', name:'Nourishing Shampoo', cat:'Hair', price:'Rs. 399', image:'productImage (3).webp', stock:13, status:'Active', tag:null, description:'A gentle cleansing shampoo that supports soft, healthy-looking hair.', benefits:['Cleanses gently','Smooth feel','Nourishing finish'], usage:'Massage into wet hair and rinse thoroughly.'},
-      {slug:'hair-x-strengthening-treatment', brand:'Oriflame - Hair X', name:'Strengthening Treatment', cat:'Hair', price:'Rs. 649', image:'productImage (3).webp', stock:8, status:'Active', tag:null, description:'A strengthening treatment that helps hair feel smoother, stronger and easier to manage.', benefits:['Hair strength support','Softens texture','Easy detangling'], usage:'Apply to damp hair after shampoo and leave for a few minutes.'},
-      {slug:'novage-ultimate-lift-serum', brand:'Oriflame - NovAge', name:'Ultimate Lift Serum', cat:'Skincare', price:'Rs. 2,499', image:'productImage (1).webp', stock:4, status:'Active', tag:null, description:'An intensive lifting serum designed to smooth and firm the look of skin.', benefits:['Firming feel','Smooth finish','Targeted treatment'], usage:'Apply to clean skin morning and night before moisturizer.'},
-      {slug:'optimals-even-out-serum', brand:'Oriflame - Optimals', name:'Even Out Advanced Serum', cat:'Skincare', price:'Rs. 1,499', image:'productImage (1).webp', stock:7, status:'Active', tag:null, description:'A brightening serum that helps even out the complexion for a fresh look.', benefits:['Tone support','Glow-boosting','Daily radiance'], usage:'Massage 2-3 drops onto cleansed skin before moisturizer.'},
-      {slug:'nature-secrets-argan-body-butter', brand:'Oriflame - Nature Secrets', name:'Argan Oil Body Butter', cat:'Bath & Body', price:'Rs. 579', image:'productImage (5).webp', stock:11, status:'Active', tag:null, description:'A rich body butter to soften and nourish skin with a velvety finish.', benefits:['Deep moisture','Silky finish','Comforting body care'], usage:'Apply to dry skin after showering for deeper hydration.'},
-      {slug:'nature-secrets-coconut-body-wash', brand:'Oriflame - Nature Secrets', name:'Coconut Water Body Wash', cat:'Bath & Body', price:'Rs. 449', image:'productImage (6).webp', stock:12, status:'Active', tag:null, description:'A refreshing body wash that leaves skin clean, soft and lightly scented.', benefits:['Fresh cleanse','Soft skin feel','Body-care staple'], usage:'Lather on wet skin and rinse away thoroughly.'}
-    ];
+    const CATEGORY_KEY = 'oriflameCategories';
+    function getCategoryList(){
+      try {
+        const saved = JSON.parse(localStorage.getItem(CATEGORY_KEY));
+        return Array.isArray(saved) ? saved : [];
+      } catch {
+        return [];
+      }
+    }
+    let CATEGORY_LIST = getCategoryList().map(cat => cat.name);
 
     function getInventoryCatalog(){
       try {
         const saved = JSON.parse(localStorage.getItem(INVENTORY_KEY));
-        if (Array.isArray(saved) && saved.length) return saved;
+        if (Array.isArray(saved)) return saved;
       } catch {}
-      localStorage.setItem(INVENTORY_KEY, JSON.stringify(FALLBACK_CATALOG));
-      return FALLBACK_CATALOG;
+      return [];
     }
     function getCart(){
       try { return JSON.parse(localStorage.getItem(CART_KEY)) || []; }
@@ -312,6 +299,7 @@
     const catalog = getInventoryCatalog().map(normalizeProduct).filter(item => item.status !== 'Hidden');
 
     function getSelectedCategory(){
+      if (!CATEGORY_LIST.length) return null;
       const params = new URLSearchParams(window.location.search);
       const cat = params.get('cat');
       return CATEGORY_LIST.includes(cat) ? cat : CATEGORY_LIST[0];
@@ -339,6 +327,10 @@
     }
 
     function renderCategoryGrid(activeCat){
+      if (!CATEGORY_LIST.length) {
+        document.getElementById('categoryGrid').innerHTML = '<div class="empty-state">No categories added yet. Create categories in the admin panel to populate this page.</div>';
+        return;
+      }
       const html = CATEGORY_LIST.map(cat => {
         const count = catalog.filter(item => item.cat === cat).length;
         return `
@@ -380,7 +372,11 @@
     }
 
     function renderSections(activeCat){
-      const cat = activeCat || CATEGORY_LIST[0];
+      const cat = activeCat || CATEGORY_LIST[0] || null;
+      if (!cat) {
+        document.getElementById('categorySections').innerHTML = '<div class="empty-state">No categories or products are available yet. Add them from the admin panel.</div>';
+        return;
+      }
       const items = catalog.filter(item => item.cat === cat);
       const sectionCards = items.length
         ? items.map(productCard).join('')
@@ -459,7 +455,8 @@
     });
 
     window.addEventListener('storage', (event) => {
-      if (event.key === INVENTORY_KEY) {
+      if (event.key === INVENTORY_KEY || event.key === CATEGORY_KEY) {
+        CATEGORY_LIST = getCategoryList().map(cat => cat.name);
         const selected = getSelectedCategory();
         renderCategoryGrid(selected);
         renderSections(selected);

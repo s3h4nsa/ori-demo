@@ -367,31 +367,8 @@
 
   <!-- Hero carousel -->
   <section class="hero-section">
-    <div class="hero-scroll" id="heroScroll">
-      <div class="hero-card green">
-        <div>
-          <div class="hero-eyebrow">Oriflame · Infinita</div>
-          <div class="hero-title">Infinita Eau de Parfum</div>
-          <p class="hero-desc">A floral-woody signature scent layered with warm amber and soft musk — made for everyday confidence.</p>
-        </div>
-        <a class="hero-cta" href="product.html?item=infinita-edp">Rs. 1,999 &nbsp;|&nbsp; BUY NOW
-          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </a>
-        <img class="hero-img" src="productImage.png" alt="Oriflame Infinita Eau de Parfum">
-      </div>
-      <div class="hero-card clay">
-        <div>
-          <div class="hero-eyebrow">Oriflame · The ONE</div>
-          <div class="hero-title">The ONE Face Glow Styler</div>
-          <p class="hero-desc">A lightweight, blurring primer that melts into skin for an instant, luminous finish under makeup.</p>
-        </div>
-        <a class="hero-cta" href="product.html?item=the-one-face-glow-styler">Rs. 979 &nbsp;|&nbsp; BUY NOW
-          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </a>
-        <img class="hero-img" src="productImage%20(7).png" alt="Oriflame The ONE Face Glow Styler">
-      </div>
-    </div>
-    <div class="dots"><span class="active"></span><span></span></div>
+    <div class="hero-scroll" id="heroScroll"></div>
+    <div class="dots" id="heroDots"></div>
   </section>
 
   <!-- Categories -->
@@ -433,12 +410,12 @@
   </section>
 
   <!-- Promo strip -->
-  <div class="promo-strip">
+  <div class="promo-strip" id="promoStrip">
     <div>
-      <h3>New season, new glow. Save 15% on your first order.</h3>
-      <p>Use code ORIFLAME15 at checkout · Ends soon</p>
+      <h3 id="promoTitle">New offerings from your admin dashboard</h3>
+      <p id="promoMeta">No active promotion yet</p>
     </div>
-    <button class="promo-cta" type="button">Shop now</button>
+    <button class="promo-cta" type="button" id="promoCta">Shop now</button>
   </div>
 
   <!-- Desktop footer -->
@@ -497,6 +474,112 @@
 <script>
   // Full browsable catalog used by the category tabs (New arrivals + extras).
   const INVENTORY_KEY = 'oriflameInventory';
+  const HERO_KEY = 'oriflameHeroSlides';
+  const DISCOUNT_KEY = 'oriflameDiscountCodes';
+  const DEFAULT_HERO_SLIDES = [];
+  const DEFAULT_DISCOUNTS = [];
+  function readStorage(key, fallback){
+    try {
+      const value = JSON.parse(localStorage.getItem(key));
+      return value && value.length ? value : fallback;
+    } catch {
+      return fallback;
+    }
+  }
+  function getHeroSlides(){
+    return readStorage(HERO_KEY, DEFAULT_HERO_SLIDES);
+  }
+  function getDiscounts(){
+    return readStorage(DISCOUNT_KEY, DEFAULT_DISCOUNTS).filter(code => code.active !== false);
+  }
+  function hexToRgb(hex){
+    const clean = (hex || '#cdeaa4').replace('#','');
+    const full = clean.length === 3 ? clean.split('').map(ch => ch + ch).join('') : clean;
+    const value = Number.parseInt(full, 16);
+    return { r:(value >> 16) & 255, g:(value >> 8) & 255, b:value & 255 };
+  }
+  function getContrastColor(hex){
+    const { r, g, b } = hexToRgb(hex);
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return luminance > 0.6 ? '#141b16' : '#fffdf8';
+  }
+  function mixHex(hex, targetHex, ratio){
+    const base = hexToRgb(hex);
+    const target = hexToRgb(targetHex);
+    const amount = Math.min(1, Math.max(0, ratio || 0));
+    const r = Math.round(base.r * (1 - amount) + target.r * amount);
+    const g = Math.round(base.g * (1 - amount) + target.g * amount);
+    const b = Math.round(base.b * (1 - amount) + target.b * amount);
+    return `rgb(${r}, ${g}, ${b})`;
+  }
+  function getProductTheme(product){
+    if (!product || !product.cat) return 'green';
+    return ['Skincare', 'Fragrance', 'Hair'].includes(product.cat) ? 'green' : 'clay';
+  }
+  function resolveHeroSlide(slide){
+    const productSlug = slide.productSlug || (slide.href || '').match(/[?&]item=([^&]+)/)?.[1];
+    const product = getInventoryCatalog().find(item => item.slug === productSlug);
+    if (!product) return slide;
+    return {
+      ...slide,
+      eyebrow: slide.eyebrow || product.brand || 'Oriflame',
+      title: slide.title || product.name || 'Featured offer',
+      description: slide.description || product.description || `Shop ${product.name} and refresh your routine with ${product.brand}.`,
+      image: slide.image || product.image || 'productImage.webp',
+      price: slide.price || product.price || 'Shop now',
+      href: slide.href || `product.html?item=${product.slug}`,
+      theme: slide.theme || getProductTheme(product),
+      themeColor: slide.themeColor || (slide.theme === 'clay' ? '#d7c4b0' : '#cdeaa4'),
+      productSlug: product.slug
+    };
+  }
+  function renderHeroSlides(){
+    const slides = getHeroSlides().map(resolveHeroSlide);
+    const scroll = document.getElementById('heroScroll');
+    const dots = document.getElementById('heroDots');
+    if (!scroll || !dots) return;
+    if (!slides.length) {
+      scroll.innerHTML = '<div class="hero-card green" style="min-width:100%; max-width:100%; display:flex; align-items:center; justify-content:center; text-align:center; color:var(--green-ink);"><div><div class="hero-eyebrow">Fresh store</div><div class="hero-title" style="max-width:100%;">No featured products yet</div><p class="hero-desc" style="max-width:100%;">Add a hero slide from the admin panel to highlight a product here.</p></div></div>';
+      dots.innerHTML = '';
+      return;
+    }
+    scroll.innerHTML = slides.map((slide, index) => {
+      const color = slide.themeColor || (slide.theme === 'clay' ? '#d7c4b0' : '#cdeaa4');
+      const accent = mixHex(color, '#ffffff', 0.32);
+      const textColor = getContrastColor(color);
+      return `
+        <div class="hero-card" data-index="${index}" style="background:linear-gradient(135deg, ${color} 0%, ${accent} 100%); color:${textColor};">
+          <div>
+            <div class="hero-eyebrow">${slide.eyebrow || 'Oriflame'}</div>
+            <div class="hero-title">${slide.title || 'Featured offer'}</div>
+            <p class="hero-desc">${slide.description || ''}</p>
+          </div>
+          <a class="hero-cta" href="${slide.href || 'index.html'}" style="background:rgba(20,20,20,.12); color:${textColor}; border:1px solid rgba(20,20,20,.08);">${slide.price || 'Shop now'} &nbsp;|&nbsp; BUY NOW
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+          <img class="hero-img" src="${slide.image || 'productImage.webp'}" alt="${slide.title || 'Featured offer'}">
+        </div>
+      `;
+    }).join('');
+    dots.innerHTML = slides.map((_, index) => `<span class="${index === 0 ? 'active' : ''}"></span>`).join('');
+  }
+  function renderPromoStrip(){
+    const active = getDiscounts()[0];
+    const title = document.getElementById('promoTitle');
+    const meta = document.getElementById('promoMeta');
+    const cta = document.getElementById('promoCta');
+    if (!title || !meta || !cta) return;
+    if (!active) {
+      title.textContent = 'Update your routine with new arrivals.';
+      meta.textContent = 'Fresh picks waiting for you';
+      cta.textContent = 'Shop now';
+      return;
+    }
+    const amount = active.type === 'percent' ? `${active.value}%` : `Rs. ${Number(active.value).toLocaleString('en-US')}`;
+    title.textContent = `New season, new glow. Save ${amount} on your order.`;
+    meta.textContent = `Use code ${active.code} at checkout · Limited time offer`;
+    cta.textContent = 'Shop now';
+  }
   function getInventoryCatalog(){
     try {
       const saved = JSON.parse(localStorage.getItem(INVENTORY_KEY)) || [];
@@ -546,6 +629,8 @@
   }
   const catalog = getInventoryCatalog().map(normalizeProduct).filter(item => item.status !== 'Hidden');
   const products = catalog.filter(item => item.status !== 'Out of stock').slice(0, 8);
+  renderHeroSlides();
+  renderPromoStrip();
 
   function cardHTML(p, idx){
    const availableStock = getAvailableStock(p.slug);

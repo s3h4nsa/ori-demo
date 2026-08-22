@@ -8,37 +8,39 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#f7f8f5;
+    --bg:#f4f6f1;
     --surface:#ffffff;
     --ink:#111712;
-    --muted:#6f7b72;
-    --line:#e1e5dc;
-    --soft:#eff2ea;
+    --muted:#627066;
+    --line:#e2e7df;
+    --soft:#eef3eb;
     --black:#141414;
-    --green:#9fcf78;
-    --green-soft:#dff1c9;
-    --amber:#b88719;
-    --amber-soft:#fff5d9;
+    --green:#88b860;
+    --green-soft:#e5f3d1;
+    --amber:#b8891c;
+    --amber-soft:#fff3cf;
     --red:#b91c1c;
-    --red-soft:#fef2f2;
-    --blue:#2563eb;
-    --blue-soft:#eff6ff;
-    --radius:16px;
-    --radius-sm:10px;
-    --sidebar:248px;
+    --red-soft:#fee2e2;
+    --blue:#275df3;
+    --blue-soft:#eaf1ff;
+    --radius:18px;
+    --radius-sm:12px;
+    --sidebar:280px;
+    --shadow:0 14px 32px rgba(17,23,18,0.08);
   }
   *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{margin:0; min-height:100%;}
   body{
     font-family:'Plus Jakarta Sans', system-ui, sans-serif;
     color:var(--ink);
-    background:var(--bg);
+    background:linear-gradient(180deg,#f6f8f3 0%,#edf1ea 100%);
     -webkit-font-smoothing:antialiased;
   }
   a{color:inherit; text-decoration:none;}
   button,input,select,textarea{font-family:inherit;}
   button{cursor:pointer;}
   img{display:block; max-width:100%;}
-  .app{min-height:100vh;}
+  .app{min-height:100vh; position:relative;}
   .admin-locked .app{display:none;}
   .admin-lock{
     position:fixed; inset:0; z-index:100; display:none; place-items:center;
@@ -54,66 +56,74 @@
   .lock-error{display:none; color:var(--red); font-size:12px; font-weight:800; margin-top:10px;}
   .lock-error.active{display:block;}
   .sidebar{
-    background:#111712; color:#fff; padding:20px;
+    background:linear-gradient(180deg,#121812 0%,#0f1411 100%);
+    color:#fff; padding:22px 18px 18px;
     display:flex; flex-direction:column; gap:22px;
+    box-shadow:inset -1px 0 0 rgba(255,255,255,.04);
   }
-  .brand{display:flex; align-items:center; gap:10px; font-size:18px; font-weight:800;}
-  .brand-dot{width:10px; height:10px; border-radius:50%; background:linear-gradient(135deg,var(--green-soft),var(--green));}
+  .brand{display:flex; align-items:center; gap:10px; font-size:18px; font-weight:800; letter-spacing:-.03em;}
+  .brand-dot{width:10px; height:10px; border-radius:50%; background:linear-gradient(135deg,var(--green-soft),var(--green)); box-shadow:0 0 0 4px rgba(136,184,96,.18);}
   .role-pill{
     display:inline-flex; width:max-content; border:1px solid rgba(255,255,255,.18);
-    border-radius:999px; padding:7px 10px; color:#cfd8ce; font-size:11px; font-weight:800;
+    border-radius:999px; padding:7px 10px; color:#d8e0d7; font-size:11px; font-weight:800;
+    letter-spacing:.04em; text-transform:uppercase;
   }
-  .side-nav{display:grid; gap:6px;}
+  .side-nav{display:grid; gap:8px;}
   .side-link{
     min-height:42px; border:none; border-radius:12px; background:transparent; color:#bec8bd;
     display:flex; align-items:center; justify-content:flex-start; padding:0 12px; font-size:13px; font-weight:800;
+    transition:all .18s ease;
   }
-  .side-link.active,.side-link:hover{background:rgba(255,255,255,.1); color:#fff;}
+  .side-link.active,.side-link:hover{background:rgba(255,255,255,.08); color:#fff; box-shadow:inset 0 0 0 1px rgba(255,255,255,.04);}
   .storefront-link{
-    margin-top:auto; min-height:42px; border-radius:12px; border:1px solid rgba(255,255,255,.18);
+    margin-top:auto; min-height:42px; border-radius:12px; border:1px solid rgba(255,255,255,.16);
     display:flex; align-items:center; justify-content:center; color:#fff; font-size:13px; font-weight:800;
-    background:transparent;
+    background:rgba(255,255,255,.02); transition:all .18s ease;
   }
+  .storefront-link:hover{background:rgba(255,255,255,.08);}
   .storefront-link + .storefront-link{margin-top:0;}
   .main{padding:20px;}
   .topbar{
     display:flex; align-items:flex-start; justify-content:space-between; gap:16px;
-    margin-bottom:18px;
+    margin-bottom:18px; padding:8px 4px 0;
   }
-  .eyebrow{font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase;}
+  .eyebrow{font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.12em;}
   h1{font-size:28px; line-height:1.08; letter-spacing:-.04em; margin-top:4px;}
   .today{font-size:12.5px; color:var(--muted); font-weight:700; text-align:right;}
   .metrics{display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:16px;}
   .metric{
     background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
-    padding:15px;
+    padding:15px; box-shadow:var(--shadow);
   }
   .metric span{display:block; color:var(--muted); font-size:11px; font-weight:800; text-transform:uppercase;}
-  .metric strong{display:block; font-size:24px; margin-top:6px;}
+  .metric strong{display:block; font-size:24px; margin-top:6px; letter-spacing:-.04em;}
   .metric small{display:block; color:var(--muted); margin-top:4px; font-size:12px;}
   .view{display:none; gap:16px;}
   .view.active{display:grid;}
   .panel{
     background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
-    overflow:hidden;
+    overflow:hidden; box-shadow:var(--shadow);
   }
   .panel-head{
     display:flex; align-items:center; justify-content:space-between; gap:14px;
     padding:16px; border-bottom:1px solid var(--line);
   }
-  .panel-title{font-size:16px; font-weight:800;}
+  .panel-title{font-size:16px; font-weight:800; letter-spacing:-.02em;}
   .panel-sub{font-size:12px; color:var(--muted); margin-top:3px;}
   .toolbar{display:flex; gap:8px; flex-wrap:wrap;}
   .btn{
     min-height:38px; border-radius:999px; border:1px solid var(--line);
     background:#fff; color:var(--ink); padding:0 14px; font-size:12px; font-weight:800;
+    transition:all .18s ease;
   }
+  .btn:hover{transform:translateY(-1px); box-shadow:0 8px 18px rgba(17,23,18,.06);}
   .btn.primary{border-color:var(--black); background:var(--black); color:#fff;}
   .btn.danger{border:none; background:var(--red-soft); color:var(--red);}
   .btn.good{border:none; background:var(--green-soft); color:#23471d;}
   .input,.select,.textarea{
     width:100%; min-height:40px; border:1px solid var(--line); background:#fff;
     border-radius:12px; padding:10px 11px; outline:none; font-size:13px;
+    transition:border-color .15s ease, box-shadow .15s ease;
   }
   .textarea{min-height:78px; resize:vertical;}
   .input:focus,.select:focus,.textarea:focus{border-color:var(--green); box-shadow:0 0 0 3px var(--green-soft);}
@@ -121,7 +131,23 @@
   .grid-form{display:grid; gap:10px; padding:14px; border-bottom:1px solid var(--line); background:var(--soft);}
   .field{display:grid; gap:6px;}
   .field label{font-size:11px; font-weight:800; color:#48534b; text-transform:uppercase;}
+  .hero-preview-wrap{padding:14px; border-top:1px solid var(--line); background:#f8faf7;}
+  .hero-preview-card{position:relative; min-height:200px; border-radius:22px; padding:20px 18px; overflow:hidden; display:flex; flex-direction:column; justify-content:space-between; box-shadow:inset 0 0 0 1px rgba(15,23,42,.04);}
+  .hero-preview-card .hero-preview-image{position:absolute; right:16px; top:50%; width:38%; height:62%; transform:translateY(-50%); object-fit:contain; object-position:center; border-radius:14px; opacity:.96;}
+  .hero-preview-card .hero-preview-copy{position:relative; z-index:1; max-width:60%;}
+  .hero-preview-card .hero-preview-eyebrow{font-size:12px; font-weight:700; opacity:.8; letter-spacing:.04em; text-transform:uppercase;}
+  .hero-preview-card .hero-preview-title{margin-top:8px; font-size:26px; line-height:1.08; letter-spacing:-.04em; font-weight:800;}
+  .hero-preview-card .hero-preview-desc{margin-top:8px; font-size:12px; line-height:1.5; opacity:.8; max-width:75%;}
+  .hero-preview-card .hero-preview-price{margin-top:14px; display:inline-flex; align-items:center; padding:9px 14px; border-radius:999px; background:rgba(20,20,20,.08); font-weight:800; backdrop-filter:blur(2px);}
   .queue{display:grid;}
+  .marketing-grid{display:grid; gap:16px;}
+  .mini-label{font-size:10px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--muted);}
+  .marketing-card,.promo-card,.category-card-admin{
+    padding:16px; border-bottom:1px solid var(--line); display:grid; gap:12px;
+  }
+  .marketing-card:last-child,.promo-card:last-child,.category-card-admin:last-child{border-bottom:none;}
+  .marketing-card strong,.promo-card strong,.category-card-admin strong{font-size:15px;}
+  .marketing-meta,.promo-meta,.category-meta{font-size:12px; color:var(--muted); line-height:1.5;}
   .order-card,.pay-card,.stock-row,.customer-row,.task-row{
     padding:16px; border-bottom:1px solid var(--line); display:grid; gap:12px;
   }
@@ -149,9 +175,19 @@
   .qty-box .input{width:82px;}
   .empty{padding:30px 16px; color:var(--muted); text-align:center; font-size:13px;}
   @media (min-width:900px){
-    .app{display:grid; grid-template-columns:var(--sidebar) 1fr;}
-    .sidebar{position:sticky; top:0; min-height:100vh;}
-    .main{padding:28px;}
+    .app{display:block; width:100%;}
+    .sidebar{
+      position:fixed; left:0; top:0; bottom:0; width:var(--sidebar);
+      min-height:100vh; z-index:20; border-right:1px solid rgba(255,255,255,.08);
+      padding:24px 18px 20px;
+    }
+    .brand{font-size:20px;}
+    .side-nav{margin-top:12px;}
+    .side-link{min-height:44px; padding:0 14px;}
+    .main{
+      margin-left:var(--sidebar); padding:28px 28px 32px; min-height:100vh;
+      width:calc(100% - var(--sidebar));
+    }
     h1{font-size:36px;}
     .metrics{grid-template-columns:repeat(5,1fr);}
     .view.orders-view.active{grid-template-columns:minmax(0,1.4fr) minmax(320px,.6fr);}
@@ -188,6 +224,7 @@
       <button class="side-link active" data-view="orders" type="button">Order queue</button>
       <button class="side-link" data-view="payments" type="button">Payment desk</button>
       <button class="side-link" data-view="inventory" type="button">Inventory</button>
+      <button class="side-link" data-view="marketing" type="button">Marketing</button>
       <button class="side-link" data-view="customers" type="button">Customers</button>
     </nav>
     <button class="storefront-link" id="adminLogoutBtn" type="button">Sign out</button>
@@ -257,7 +294,7 @@
             <div class="panel-title">Inventory control</div>
             <div class="panel-sub">Add, edit, remove, adjust stock and mark availability.</div>
           </div>
-          <button class="btn" id="resetInventoryBtn" type="button">Restore default stock</button>
+          <button class="btn" id="resetInventoryBtn" type="button">Clear inventory</button>
         </div>
         <form class="grid-form" id="productForm">
           <input type="hidden" id="editSlug">
@@ -271,13 +308,7 @@
           </div>
           <div class="field">
             <label for="pCat">Category</label>
-            <select class="select" id="pCat">
-              <option>Fragrance</option>
-              <option>Makeup</option>
-              <option>Hair</option>
-              <option>Skincare</option>
-              <option>Bath & Body</option>
-            </select>
+            <select class="select" id="pCat"></select>
           </div>
           <div class="field">
             <label for="pPrice">Price</label>
@@ -306,6 +337,140 @@
       </div>
     </section>
 
+    <section class="view" id="marketingView">
+      <div class="marketing-grid">
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">Hero carousel</div>
+              <div class="panel-sub">Update the storefront homepage promos and calls to action.</div>
+            </div>
+          </div>
+          <form class="grid-form" id="heroForm">
+            <input type="hidden" id="heroEditId">
+            <div class="field wide">
+              <label for="heroProduct">Assigned product</label>
+              <select class="select" id="heroProduct">
+                <option value="">Custom promo (no product selected)</option>
+              </select>
+            </div>
+            <div class="field wide">
+              <label for="heroEyebrow">Eyebrow</label>
+              <input class="input" id="heroEyebrow" placeholder="Oriflame · Infinita">
+            </div>
+            <div class="field wide">
+              <label for="heroTitle">Title</label>
+              <input class="input" id="heroTitle" required placeholder="Infinita Eau de Parfum">
+            </div>
+            <div class="field wide">
+              <label for="heroDesc">Description</label>
+              <textarea class="textarea" id="heroDesc" placeholder="Short promo text for the storefront"></textarea>
+            </div>
+            <div class="field wide">
+              <label for="heroImage">Image</label>
+              <input class="input" id="heroImage" required placeholder="productImage.webp">
+            </div>
+            <div class="field">
+              <label for="heroTheme">Theme</label>
+              <select class="select" id="heroTheme">
+                <option value="custom">Custom color</option>
+                <option value="green">Green</option>
+                <option value="clay">Clay</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="heroColor">Theme color</label>
+              <input class="input" id="heroColor" type="color" value="#cdeaa4" style="min-height:40px; height:40px; padding:4px; cursor:pointer;">
+            </div>
+            <div class="field">
+              <label for="heroPrice">Price</label>
+              <input class="input" id="heroPrice" required placeholder="Rs. 1,999">
+            </div>
+            <div class="field wide">
+              <label for="heroHref">Product link</label>
+              <input class="input" id="heroHref" placeholder="index.html">
+            </div>
+            <button class="btn primary" type="submit" id="saveHeroBtn">Save hero slide</button>
+          </form>
+          <div class="hero-preview-wrap">
+            <div class="mini-label" style="margin-bottom:10px;">Live preview</div>
+            <div class="hero-preview-card" id="heroPreviewCard">
+              <div class="hero-preview-copy">
+                <div class="hero-preview-eyebrow" id="heroPreviewEyebrow">Oriflame</div>
+                <div class="hero-preview-title" id="heroPreviewTitle">Featured offer</div>
+                <div class="hero-preview-desc" id="heroPreviewDesc">Choose a product and create a matching hero banner.</div>
+                <div class="hero-preview-price" id="heroPreviewPrice">Rs. 1,999</div>
+              </div>
+              <img class="hero-preview-image" id="heroPreviewImage" src="productImage.webp" alt="Hero preview image">
+            </div>
+          </div>
+          <div class="queue" id="heroList"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">Discount codes</div>
+              <div class="panel-sub">Create promo codes for seasonal campaigns and first purchases.</div>
+            </div>
+          </div>
+          <form class="grid-form" id="discountForm">
+            <input type="hidden" id="discountEditId">
+            <div class="field">
+              <label for="discountCode">Code</label>
+              <input class="input" id="discountCode" required placeholder="ORIFLAME15">
+            </div>
+            <div class="field">
+              <label for="discountTitle">Label</label>
+              <input class="input" id="discountTitle" placeholder="First order welcome">
+            </div>
+            <div class="field">
+              <label for="discountType">Type</label>
+              <select class="select" id="discountType">
+                <option value="percent">Percent</option>
+                <option value="fixed">Fixed</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="discountValue">Value</label>
+              <input class="input" id="discountValue" required type="number" min="1" value="15">
+            </div>
+            <div class="field">
+              <label for="discountActive">Active</label>
+              <select class="select" id="discountActive">
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+              </select>
+            </div>
+            <button class="btn primary" type="submit" id="saveDiscountBtn">Save code</button>
+          </form>
+          <div class="queue" id="discountList"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">Category directory</div>
+              <div class="panel-sub">Manage the categories users can browse from the homepage and category page.</div>
+            </div>
+          </div>
+          <form class="grid-form" id="categoryForm">
+            <input type="hidden" id="categoryEditId">
+            <div class="field wide">
+              <label for="categoryName">Category name</label>
+              <input class="input" id="categoryName" required placeholder="Skincare">
+            </div>
+            <div class="field wide">
+              <label for="categoryDescription">Description</label>
+              <textarea class="textarea" id="categoryDescription" placeholder="Short category intro text"></textarea>
+            </div>
+            <button class="btn primary" type="submit" id="saveCategoryBtn">Save category</button>
+          </form>
+          <div class="queue" id="categoryList"></div>
+        </div>
+      </div>
+    </section>
+
     <section class="view" id="customersView">
       <div class="panel">
         <div class="panel-head">
@@ -330,27 +495,19 @@
   const INVENTORY_VERSION = '2';
   const staff = ['Owner'];
   const statuses = ['New', 'WhatsApp confirmed', 'Payment pending', 'Payment verified', 'Packing', 'Ready for dispatch', 'Completed'];
-  const sampleInventory = [
-    {slug:'infinita-edp', brand:'Oriflame - Infinita', name:'Eau de Parfum', cat:'Fragrance', price:'Rs. 1,999', image:'productImage.webp', stock:12, status:'Active'},
-    {slug:'waunt-super-recover-day-cream', brand:'Oriflame', name:'Super Recover Whipped Day Cream', cat:'Skincare', price:'Rs. 1,259', image:'productImage%20(1).webp', stock:8, status:'Active'},
-    {slug:'infinita-you-edp', brand:'Oriflame - InfinitaYou', name:'Eau de Parfum', cat:'Fragrance', price:'Rs. 1,999', image:'productImage%20(2).webp', stock:9, status:'Active'},
-    {slug:'milk-honey-conditioner', brand:'Oriflame - Milk & Honey Gold', name:'Nourishing Conditioner', cat:'Hair', price:'Rs. 399', image:'productImage%20(3).webp', stock:0, status:'Out of stock'},
-    {slug:'marshma-love-edt', brand:'Oriflame - MARSHMA-LOVE', name:'Eau de Toilette', cat:'Fragrance', price:'Rs. 1,259', image:'productImage%20(4).webp', stock:7, status:'Active'},
-    {slug:'spring-song-hand-cream', brand:'Oriflame - Spring Song', name:'Hand Cream', cat:'Bath & Body', price:'Rs. 199', image:'productImage%20(5).webp', stock:18, status:'Active'},
-    {slug:'spring-song-shower-gel', brand:'Oriflame - Spring Song', name:'Shower Gel', cat:'Bath & Body', price:'Rs. 299', image:'productImage%20(6).webp', stock:14, status:'Active'},
-    {slug:'the-one-face-glow-styler', brand:'Oriflame - The ONE', name:'Face Glow Styler', cat:'Makeup', price:'Rs. 979', image:'productImage%20(7).webp', stock:3, status:'Low stock'},
-    {slug:'eclat-mystique-edp', brand:'Oriflame - Eclat Mystique', name:'Eau de Parfum', cat:'Fragrance', price:'Rs. 1,899', image:'productImage.jpg', stock:6, status:'Active'},
-    {slug:'eclat-homme-elite-edt', brand:'Oriflame - Eclat Homme Elite', name:'Eau de Toilette', cat:'Fragrance', price:'Rs. 1,699', image:'productImage%20(2).webp', stock:5, status:'Active'},
-    {slug:'the-one-lip-lacquer', brand:'Oriflame - The ONE', name:'Lip Lacquer', cat:'Makeup', price:'Rs. 549', image:'productImage%20(7).webp', stock:10, status:'Active'},
-    {slug:'the-one-eyeshadow-palette', brand:'Oriflame - The ONE', name:'Colour Stylist Eyeshadow Palette', cat:'Makeup', price:'Rs. 899', image:'productImage%20(7).webp', stock:6, status:'Active'},
-    {slug:'the-one-wonder-lash-mascara', brand:'Oriflame - The ONE', name:'Wonder Lash Mascara', cat:'Makeup', price:'Rs. 699', image:'productImage%20(7).webp', stock:9, status:'Active'},
-    {slug:'milk-honey-shampoo', brand:'Oriflame - Milk & Honey Gold', name:'Nourishing Shampoo', cat:'Hair', price:'Rs. 399', image:'productImage%20(3).webp', stock:13, status:'Active'},
-    {slug:'hair-x-strengthening-treatment', brand:'Oriflame - Hair X', name:'Strengthening Treatment', cat:'Hair', price:'Rs. 649', image:'productImage%20(3).webp', stock:8, status:'Active'},
-    {slug:'novage-ultimate-lift-serum', brand:'Oriflame - NovAge', name:'Ultimate Lift Serum', cat:'Skincare', price:'Rs. 2,499', image:'productImage%20(1).webp', stock:4, status:'Active'},
-    {slug:'optimals-even-out-serum', brand:'Oriflame - Optimals', name:'Even Out Advanced Serum', cat:'Skincare', price:'Rs. 1,499', image:'productImage%20(1).webp', stock:7, status:'Active'},
-    {slug:'nature-secrets-argan-body-butter', brand:'Oriflame - Nature Secrets', name:'Argan Oil Body Butter', cat:'Bath & Body', price:'Rs. 579', image:'productImage%20(5).webp', stock:11, status:'Active'},
-    {slug:'nature-secrets-coconut-body-wash', brand:'Oriflame - Nature Secrets', name:'Coconut Water Body Wash', cat:'Bath & Body', price:'Rs. 449', image:'productImage%20(6).webp', stock:12, status:'Active'}
+  const CATEGORIES_KEY = 'oriflameCategories';
+  const HERO_KEY = 'oriflameHeroSlides';
+  const DISCOUNT_KEY = 'oriflameDiscountCodes';
+  const defaultCategories = [];
+  const defaultHeroSlides = [];
+  const defaultDiscounts = [];
+  const LEGACY_DEFAULT_CATEGORY_IDS = ['skincare', 'makeup', 'fragrance', 'hair', 'bath-body'];
+  const LEGACY_DEFAULT_HERO_IDS = ['hero-infinita', 'hero-glow', 'hero-summer'];
+  const LEGACY_DEFAULT_DISCOUNT_CODES = ['ORIFLAME15', 'BUNDLE20'];
+  const LEGACY_DEMO_PRODUCT_SLUGS = [
+    'infinita-edp','waunt-super-recover-day-cream','infinita-you-edp','milk-honey-conditioner','marshma-love-edt','spring-song-hand-cream','spring-song-shower-gel','the-one-face-glow-styler','eclat-mystique-edp','eclat-homme-elite-edt','the-one-lip-lacquer','the-one-eyeshadow-palette','the-one-wonder-lash-mascara','milk-honey-shampoo','hair-x-strengthening-treatment','novage-ultimate-lift-serum','optimals-even-out-serum','nature-secrets-argan-body-butter','nature-secrets-coconut-body-wash'
   ];
+  const emptyInventory = [];
 
   function read(key, fallback){
     try { return JSON.parse(localStorage.getItem(key)) || fallback; }
@@ -358,29 +515,140 @@
   }
   function write(key, value){ localStorage.setItem(key, JSON.stringify(value)); }
   function slugify(text){ return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `item-${Date.now()}`; }
+  function clearLegacyInventoryIfNeeded(){
+    try {
+      const saved = JSON.parse(localStorage.getItem(INVENTORY_KEY) || '[]');
+      if (Array.isArray(saved) && saved.some(item => LEGACY_DEMO_PRODUCT_SLUGS.includes(String(item.slug)))) {
+        write(INVENTORY_KEY, emptyInventory);
+        localStorage.setItem(INVENTORY_VERSION_KEY, INVENTORY_VERSION);
+        return true;
+      }
+    } catch {}
+    return false;
+  }
+  function clearLegacyMarketingDefaults(){
+    const keys = [CATEGORIES_KEY, HERO_KEY, DISCOUNT_KEY];
+    keys.forEach(key => {
+      try {
+        const saved = JSON.parse(localStorage.getItem(key) || '[]');
+        if (!Array.isArray(saved) || !saved.length) return;
+        const isLegacy = key === CATEGORIES_KEY
+          ? saved.some(item => LEGACY_DEFAULT_CATEGORY_IDS.includes(String(item.id)))
+          : key === HERO_KEY
+            ? saved.some(item => LEGACY_DEFAULT_HERO_IDS.includes(String(item.id)))
+            : saved.some(item => LEGACY_DEFAULT_DISCOUNT_CODES.includes(String(item.code)) || item.title === 'First order welcome');
+        if (isLegacy) write(key, []);
+      } catch {}
+    });
+  }
+  function ensureDefaults(){
+    clearLegacyInventoryIfNeeded();
+    clearLegacyMarketingDefaults();
+    if (!localStorage.getItem(CATEGORIES_KEY)) write(CATEGORIES_KEY, defaultCategories);
+    if (!localStorage.getItem(HERO_KEY)) write(HERO_KEY, defaultHeroSlides);
+    if (!localStorage.getItem(DISCOUNT_KEY)) write(DISCOUNT_KEY, defaultDiscounts);
+    if (!localStorage.getItem(INVENTORY_KEY)) {
+      write(INVENTORY_KEY, emptyInventory);
+      localStorage.setItem(INVENTORY_VERSION_KEY, INVENTORY_VERSION);
+    }
+  }
+  function getCategories(){
+    const saved = read(CATEGORIES_KEY, defaultCategories);
+    return Array.isArray(saved) ? saved : [];
+  }
+  function saveCategories(items){ write(CATEGORIES_KEY, items); }
+  function getHeroSlides(){
+    const saved = read(HERO_KEY, defaultHeroSlides);
+    return Array.isArray(saved) ? saved : [];
+  }
+  function saveHeroSlides(items){ write(HERO_KEY, items); }
+  function getDiscounts(){
+    const saved = read(DISCOUNT_KEY, defaultDiscounts);
+    return Array.isArray(saved) ? saved : [];
+  }
+  function saveDiscounts(items){ write(DISCOUNT_KEY, items); }
   function unlockAdmin(){
     sessionStorage.setItem(ADMIN_SESSION_KEY, 'true');
     document.body.classList.remove('admin-locked');
   }
   if (sessionStorage.getItem(ADMIN_SESSION_KEY) === 'true') unlockAdmin();
+  ensureDefaults();
   function money(value){ return `Rs. ${Number(value || 0).toLocaleString('en-US')}`; }
+  function hexToRgb(hex){
+    const clean = hex.replace('#','');
+    const full = clean.length === 3 ? clean.split('').map(char => char + char).join('') : clean;
+    const value = Number.parseInt(full, 16);
+    return { r:(value >> 16) & 255, g:(value >> 8) & 255, b:value & 255 };
+  }
+  function mixHex(hex, targetHex, weight){
+    const base = hexToRgb(hex);
+    const target = hexToRgb(targetHex);
+    const amount = Math.min(1, Math.max(0, weight || 0));
+    const r = Math.round(base.r * (1 - amount) + target.r * amount);
+    const g = Math.round(base.g * (1 - amount) + target.g * amount);
+    const b = Math.round(base.b * (1 - amount) + target.b * amount);
+    return `rgb(${r}, ${g}, ${b})`;
+  }
+  function getTextColorForBackground(hex){
+    const {r,g,b} = hexToRgb(hex || '#cdeaa4');
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return luminance > 0.6 ? '#141b16' : '#fffdf8';
+  }
+  function getHeroPreviewTheme(themeColor){
+    const color = themeColor || '#cdeaa4';
+    const textColor = getTextColorForBackground(color);
+    return {
+      color: textColor,
+      softColor: mixHex(color, '#ffffff', 0.32),
+      edgeColor: mixHex(color, '#000000', 0.18)
+    };
+  }
+  function refreshHeroPreview(){
+    const title = document.getElementById('heroTitle');
+    const eyebrow = document.getElementById('heroEyebrow');
+    const desc = document.getElementById('heroDesc');
+    const price = document.getElementById('heroPrice');
+    const image = document.getElementById('heroImage');
+    const color = document.getElementById('heroColor');
+    const preview = document.getElementById('heroPreviewCard');
+    if (!preview || !title || !color) return;
+    const selected = color.value || '#cdeaa4';
+    const theme = getHeroPreviewTheme(selected);
+    const sourceLabel = eyebrow.value || 'Oriflame';
+    const titleText = title.value || 'Featured offer';
+    const descText = desc.value || 'Choose a product and create a matching hero banner.';
+    const priceText = price.value || 'Rs. 1,999';
+    const imageUrl = image.value || 'productImage.webp';
+    preview.style.background = `linear-gradient(135deg, ${selected} 0%, ${theme.softColor} 100%)`;
+    preview.style.color = theme.color;
+    preview.style.boxShadow = `inset 0 0 0 1px ${theme.edgeColor}`;
+    document.getElementById('heroPreviewEyebrow').textContent = sourceLabel;
+    document.getElementById('heroPreviewTitle').textContent = titleText;
+    document.getElementById('heroPreviewDesc').textContent = descText;
+    document.getElementById('heroPreviewPrice').textContent = priceText;
+    document.getElementById('heroPreviewPrice').style.color = theme.color;
+    document.getElementById('heroPreviewImage').src = imageUrl;
+    document.getElementById('heroPreviewImage').alt = titleText;
+  }
   function getOrders(){ return read(ORDER_KEY, []).map(normalizeOrder); }
   function saveOrders(orders){ write(ORDER_KEY, orders); }
   function getInventory(){
     const saved = read(INVENTORY_KEY, null);
     if (saved) {
-      if (localStorage.getItem(INVENTORY_VERSION_KEY) !== INVENTORY_VERSION) {
-        const existingSlugs = new Set(saved.map(item => item.slug));
-        const merged = [...saved, ...sampleInventory.filter(item => !existingSlugs.has(item.slug))];
-        write(INVENTORY_KEY, merged);
+      if (Array.isArray(saved) && saved.some(item => LEGACY_DEMO_PRODUCT_SLUGS.includes(String(item.slug)))) {
+        write(INVENTORY_KEY, emptyInventory);
         localStorage.setItem(INVENTORY_VERSION_KEY, INVENTORY_VERSION);
-        return merged;
+        return [];
       }
-      return saved;
+      if (localStorage.getItem(INVENTORY_VERSION_KEY) !== INVENTORY_VERSION) {
+        write(INVENTORY_KEY, saved);
+        localStorage.setItem(INVENTORY_VERSION_KEY, INVENTORY_VERSION);
+      }
+      return Array.isArray(saved) ? saved : [];
     }
-    write(INVENTORY_KEY, sampleInventory);
+    write(INVENTORY_KEY, emptyInventory);
     localStorage.setItem(INVENTORY_VERSION_KEY, INVENTORY_VERSION);
-    return sampleInventory;
+    return [];
   }
   function saveInventory(items){ write(INVENTORY_KEY, items); }
   function normalizeOrder(order){
@@ -415,9 +683,23 @@
   }
   function customerKey(order){ return `${order.customer?.phone || ''}-${order.customer?.name || ''}`; }
 
+  function syncHeroProductOptions(){
+    const heroProduct = document.getElementById('heroProduct');
+    if (!heroProduct) return;
+    const items = getInventory();
+    const selected = heroProduct.value;
+    heroProduct.innerHTML = '<option value="">Custom promo (no product selected)</option>' + items.map(item => `<option value="${item.slug}">${item.name}</option>`).join('');
+    heroProduct.value = items.some(item => item.slug === selected) ? selected : '';
+  }
   function setupSelects(){
     document.getElementById('statusFilter').innerHTML = ['All statuses', ...statuses].map(item => `<option>${item}</option>`).join('');
     document.getElementById('ownerFilter').innerHTML = ['All owners', ...staff].map(item => `<option>${item}</option>`).join('');
+    const catSelect = document.getElementById('pCat');
+    if (catSelect) {
+      const cats = getCategories().map(cat => cat.name);
+      catSelect.innerHTML = cats.map(item => `<option>${item}</option>`).join('');
+    }
+    syncHeroProductOptions();
   }
   function renderMetrics(){
     const orders = getOrders();
@@ -429,11 +711,49 @@
     document.getElementById('mLow').textContent = inventory.filter(item => Number(item.stock) <= 3 || item.status === 'Low stock').length;
     document.getElementById('mCustomers').textContent = customers.size;
   }
+  function getStatusUpdateMessage(order, status){
+    const customerName = order.customer?.name || 'Customer';
+    const orderId = order.id || 'your order';
+    const messageMap = {
+      'WhatsApp confirmed': `Hi ${customerName}, your order ${orderId} has been confirmed. We will continue with your order and keep you updated before dispatch.`,
+      'Payment pending': `Hi ${customerName}, we are still waiting for payment confirmation for order ${orderId}. Please send the payment proof and we will continue promptly.`,
+      'Payment verified': `Hi ${customerName}, payment for order ${orderId} has been verified. We are now preparing your items for packing.`,
+      'Packing': `Hi ${customerName}, your order ${orderId} is being packed and prepared for dispatch.`,
+      'Ready for dispatch': `Hi ${customerName}, your order ${orderId} is ready for dispatch. We will share the final delivery details shortly.`,
+      'Completed': `Hi ${customerName}, your order ${orderId} has been completed. Thank you for shopping with us!`,
+      'New': `Hi ${customerName}, we have received your order ${orderId}. We will keep you updated as it moves through processing.`
+    };
+    return messageMap[status] || `Hi ${customerName}, there is an update for order ${orderId}.`;
+  }
+  function sendCustomerOrderUpdate(order, status){
+    if (!order || !status) return;
+    const customer = order.customer || {};
+    const phone = String(customer.phone || '').replace(/\D/g, '');
+    const email = String(customer.email || '').trim();
+    const subject = `Order ${order.id} update – ${status}`;
+    const text = getStatusUpdateMessage(order, status);
+    const links = [];
+    if (phone.length >= 9) {
+      links.push({ type:'sms', href:`sms:${phone}?body=${encodeURIComponent(text)}` });
+    }
+    if (email) {
+      links.push({ type:'email', href:`mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}` });
+    }
+    if (!links.length) return;
+    const primaryLink = links[0];
+    setTimeout(() => {
+      try {
+        window.open(primaryLink.href, '_blank');
+      } catch {
+        console.log(`Customer ${primaryLink.type} update queued for ${order.id}`);
+      }
+    }, 120);
+  }
   function renderOrders(){
     const query = document.getElementById('orderSearch').value.trim().toLowerCase();
     const status = document.getElementById('statusFilter').value;
     const owner = document.getElementById('ownerFilter').value;
-    const orders = getOrders().filter(order => {
+    const orders = getOrders().filter(order => order.status !== 'Completed').filter(order => {
       const haystack = `${order.id} ${order.customer?.name || ''} ${order.customer?.phone || ''}`.toLowerCase();
       return (!query || haystack.includes(query))
         && (status === 'All statuses' || order.status === status)
@@ -461,7 +781,7 @@
           <div class="pipeline">${statuses.slice(0, 6).map((_, step) => `<span class="pipe-step${step <= idx ? ' done' : ''}"></span>`).join('')}</div>
           <div class="actions">
             <select class="select" data-owner="${order.id}">${staff.map(name => `<option${name === order.owner ? ' selected' : ''}>${name}</option>`).join('')}</select>
-            ${statuses.map(name => `<button class="btn" data-order-status="${order.id}" data-status="${name}" type="button">${name}</button>`).join('')}
+            ${statuses.filter(name => name !== 'Completed').map(name => `<button class="btn" data-order-status="${order.id}" data-status="${name}" type="button">${name}</button>`).join('')}
             <button class="btn danger" data-remove-order="${order.id}" type="button">Remove</button>
           </div>
         </article>`;
@@ -558,6 +878,74 @@
       </article>
     `).join('') : '<div class="empty">Customer records appear after orders are placed.</div>';
   }
+  function renderHeroSlides(){
+    const list = document.getElementById('heroList');
+    const items = getHeroSlides();
+    list.innerHTML = items.map(item => {
+      const color = item.themeColor || (item.theme === 'clay' ? '#d7c4b0' : '#cdeaa4');
+      const themeLabel = item.theme && item.theme !== 'custom' ? item.theme : 'custom';
+      return `
+        <article class="marketing-card">
+          <div class="row-top">
+            <div>
+              <div class="mini-label">${item.eyebrow || 'Promo'}</div>
+              <strong>${item.title}</strong>
+            </div>
+            <span class="badge" style="background:${color}; color:${getTextColorForBackground(color)};">${themeLabel}</span>
+          </div>
+          <div class="marketing-meta">${item.description || 'No description set yet.'}</div>
+          <div class="marketing-meta">Image: ${item.image} · Link: ${item.href || '#'} · Color: ${item.themeColor || color}</div>
+          <div class="actions">
+            <button class="btn" data-edit-hero="${item.id}" type="button">Edit</button>
+            <button class="btn danger" data-remove-hero="${item.id}" type="button">Remove</button>
+          </div>
+        </article>
+      `;
+    }).join('') || '<div class="empty">No hero slides set yet.</div>';
+  }
+
+  function renderDiscounts(){
+    const list = document.getElementById('discountList');
+    const items = getDiscounts();
+    list.innerHTML = items.map(item => `
+      <article class="promo-card">
+        <div class="row-top">
+          <div>
+            <div class="mini-label">${item.code}</div>
+            <strong>${item.title || item.code}</strong>
+          </div>
+          <span class="badge ${item.active ? 'ok' : 'red'}">${item.active ? 'Active' : 'Inactive'}</span>
+        </div>
+        <div class="promo-meta">${item.type === 'percent' ? `${item.value}% discount` : `Rs. ${Number(item.value).toLocaleString('en-US')} off`}</div>
+        <div class="actions">
+          <button class="btn" data-edit-discount="${item.id}" type="button">Edit</button>
+          <button class="btn danger" data-remove-discount="${item.id}" type="button">Remove</button>
+        </div>
+      </article>
+    `).join('') || '<div class="empty">No discount codes added.</div>';
+  }
+
+  function renderCategories(){
+    const list = document.getElementById('categoryList');
+    const items = getCategories();
+    list.innerHTML = items.map(item => `
+      <article class="category-card-admin">
+        <div class="row-top">
+          <div>
+            <div class="mini-label">${item.id}</div>
+            <strong>${item.name}</strong>
+          </div>
+          <span class="badge blue">${item.name}</span>
+        </div>
+        <div class="category-meta">${item.description || 'No description available.'}</div>
+        <div class="actions">
+          <button class="btn" data-edit-category="${item.id}" type="button">Edit</button>
+          <button class="btn danger" data-remove-category="${item.id}" type="button">Remove</button>
+        </div>
+      </article>
+    `).join('') || '<div class="empty">No categories added yet.</div>';
+  }
+
   function rerender(){
     renderMetrics();
     renderOrders();
@@ -565,6 +953,10 @@
     renderWorkload();
     renderInventory();
     renderCustomers();
+    renderHeroSlides();
+    renderDiscounts();
+    renderCategories();
+    setupSelects();
   }
   function updateOrder(id, patch){
     const orders = getOrders();
@@ -580,7 +972,12 @@
       }
       return current;
     });
-    saveOrders(nextOrders.map(normalizeOrder));
+    const normalized = nextOrders.map(normalizeOrder);
+    if (patch.status && patch.status !== target.status) {
+      const updatedTarget = normalized.find(order => order.id === id);
+      if (updatedTarget) sendCustomerOrderUpdate(updatedTarget, patch.status);
+    }
+    saveOrders(normalized);
     rerender();
   }
 
@@ -618,7 +1015,24 @@
     const stockSave = e.target.closest('[data-stock-save]');
     const editProduct = e.target.closest('[data-edit-product]');
     const removeProduct = e.target.closest('[data-remove-product]');
-    if (statusBtn) updateOrder(statusBtn.dataset.orderStatus, {status:statusBtn.dataset.status});
+    const editHero = e.target.closest('[data-edit-hero]');
+    const removeHero = e.target.closest('[data-remove-hero]');
+    const editDiscount = e.target.closest('[data-edit-discount]');
+    const removeDiscount = e.target.closest('[data-remove-discount]');
+    const editCategory = e.target.closest('[data-edit-category]');
+    const removeCategory = e.target.closest('[data-remove-category]');
+
+    if (statusBtn) {
+      const nextStatus = statusBtn.dataset.status;
+      const currentOrder = getOrders().find(order => order.id === statusBtn.dataset.orderStatus);
+      if (nextStatus === 'Completed' && currentOrder) {
+        saveOrders(getOrders().filter(order => order.id !== currentOrder.id));
+        rerender();
+        sendCustomerOrderUpdate(currentOrder, 'Completed');
+        return;
+      }
+      updateOrder(statusBtn.dataset.orderStatus, {status: nextStatus});
+    }
     if (removeOrder) {
       saveOrders(getOrders().filter(order => order.id !== removeOrder.dataset.removeOrder));
       rerender();
@@ -640,10 +1054,62 @@
       document.getElementById('pImage').value = item.image;
       document.getElementById('pStatus').value = item.status;
       document.getElementById('saveProductBtn').textContent = 'Update item';
+      document.querySelector('.side-link[data-view="inventory"]').click();
       window.scrollTo({top:0, behavior:'smooth'});
     }
     if (removeProduct) {
       saveInventory(getInventory().filter(item => item.slug !== removeProduct.dataset.removeProduct));
+      rerender();
+    }
+    if (editHero) {
+      const item = getHeroSlides().find(slide => slide.id === editHero.dataset.editHero);
+      if (!item) return;
+      document.getElementById('heroEditId').value = item.id;
+      document.getElementById('heroProduct').value = item.productSlug || '';
+      document.getElementById('heroEyebrow').value = item.eyebrow || '';
+      document.getElementById('heroTitle').value = item.title || '';
+      document.getElementById('heroDesc').value = item.description || '';
+      document.getElementById('heroImage').value = item.image || '';
+      document.getElementById('heroTheme').value = item.theme || 'custom';
+      document.getElementById('heroColor').value = item.themeColor || '#cdeaa4';
+      document.getElementById('heroPrice').value = item.price || '';
+      document.getElementById('heroHref').value = item.href || '';
+      refreshHeroPreview();
+      document.getElementById('saveHeroBtn').textContent = 'Update hero slide';
+      document.querySelector('.side-link[data-view="marketing"]').click();
+    }
+    if (removeHero) {
+      saveHeroSlides(getHeroSlides().filter(item => item.id !== removeHero.dataset.removeHero));
+      rerender();
+    }
+    if (editDiscount) {
+      const item = getDiscounts().find(code => code.id === editDiscount.dataset.editDiscount);
+      if (!item) return;
+      document.getElementById('discountEditId').value = item.id;
+      document.getElementById('discountCode').value = item.code || '';
+      document.getElementById('discountTitle').value = item.title || '';
+      document.getElementById('discountType').value = item.type || 'percent';
+      document.getElementById('discountValue').value = item.value || 0;
+      document.getElementById('discountActive').value = String(Boolean(item.active));
+      document.getElementById('saveDiscountBtn').textContent = 'Update code';
+      document.querySelector('.side-link[data-view="marketing"]').click();
+    }
+    if (removeDiscount) {
+      saveDiscounts(getDiscounts().filter(item => item.id !== removeDiscount.dataset.removeDiscount));
+      rerender();
+    }
+    if (editCategory) {
+      const item = getCategories().find(cat => cat.id === editCategory.dataset.editCategory);
+      if (!item) return;
+      document.getElementById('categoryEditId').value = item.id;
+      document.getElementById('categoryName').value = item.name || '';
+      document.getElementById('categoryDescription').value = item.description || '';
+      document.getElementById('saveCategoryBtn').textContent = 'Update category';
+      document.querySelector('.side-link[data-view="marketing"]').click();
+    }
+    if (removeCategory) {
+      saveCategories(getCategories().filter(item => item.id !== removeCategory.dataset.removeCategory));
+      setupSelects();
       rerender();
     }
   });
@@ -655,8 +1121,8 @@
     const order = {
       id:`OLK-${Date.now().toString().slice(-6)}`,
       customer:{name:'Walk-in Customer', phone:'077 000 0000', address:'Colombo'},
-      items:[{slug:'infinita-edp', qty:1, name:'Eau de Parfum', price:'Rs. 1,999'}],
-      total:1999,
+      items:[{slug:'demo-product', qty:1, name:'Custom product item', price:'Rs. 0'}],
+      total:0,
       payment:{method:'bank', label:'Bank transfer', bank:'Commercial Bank', app:'', reference:''},
       status:'Payment pending',
       stockAdjusted:false,
@@ -664,6 +1130,93 @@
       createdAt:new Date().toISOString()
     };
     saveOrders([order, ...getOrders()]);
+    rerender();
+  });
+  function getHeroThemeFromProduct(product){
+    if (!product || !product.cat) return 'green';
+    const palette = {
+      Skincare: 'green',
+      Makeup: 'clay',
+      Fragrance: 'green',
+      Hair: 'green',
+      'Bath & Body': 'clay'
+    };
+    return palette[product.cat] || 'green';
+  }
+  function applyHeroProductSelection(){
+    const productSlug = document.getElementById('heroProduct').value;
+    if (!productSlug) return;
+    const product = getInventory().find(item => item.slug === productSlug);
+    if (!product) return;
+    document.getElementById('heroEyebrow').value = product.brand || 'Oriflame';
+    document.getElementById('heroTitle').value = product.name || '';
+    document.getElementById('heroDesc').value = product.description || `Shop ${product.name} and refresh your routine with ${product.brand}.`;
+    document.getElementById('heroImage').value = product.image || '';
+    document.getElementById('heroTheme').value = 'custom';
+    document.getElementById('heroColor').value = document.getElementById('heroColor').value || '#cdeaa4';
+    document.getElementById('heroPrice').value = product.price || '';
+    document.getElementById('heroHref').value = `product.html?item=${product.slug}`;
+    refreshHeroPreview();
+  }
+  document.getElementById('heroProduct').addEventListener('change', applyHeroProductSelection);
+  document.getElementById('heroForm').addEventListener('input', refreshHeroPreview);
+  document.getElementById('heroForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const items = getHeroSlides();
+    const hero = {
+      id: document.getElementById('heroEditId').value || `hero-${Date.now()}`,
+      productSlug: document.getElementById('heroProduct').value || '',
+      eyebrow: document.getElementById('heroEyebrow').value.trim(),
+      title: document.getElementById('heroTitle').value.trim(),
+      description: document.getElementById('heroDesc').value.trim(),
+      image: document.getElementById('heroImage').value.trim(),
+      theme: document.getElementById('heroTheme').value || 'custom',
+      themeColor: document.getElementById('heroColor').value || '#cdeaa4',
+      price: document.getElementById('heroPrice').value.trim(),
+      href: document.getElementById('heroHref').value.trim() || 'index.html'
+    };
+    const next = document.getElementById('heroEditId').value ? items.map(item => item.id === hero.id ? hero : item) : [hero, ...items];
+    saveHeroSlides(next);
+    e.target.reset();
+    document.getElementById('heroEditId').value = '';
+    document.getElementById('heroProduct').value = '';
+    document.getElementById('heroColor').value = '#cdeaa4';
+    document.getElementById('saveHeroBtn').textContent = 'Save hero slide';
+    refreshHeroPreview();
+    rerender();
+  });
+  document.getElementById('discountForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const items = getDiscounts();
+    const code = {
+      id: document.getElementById('discountEditId').value || `disc-${Date.now()}`,
+      code: document.getElementById('discountCode').value.trim().toUpperCase(),
+      title: document.getElementById('discountTitle').value.trim(),
+      type: document.getElementById('discountType').value,
+      value: Number(document.getElementById('discountValue').value),
+      active: document.getElementById('discountActive').value === 'true'
+    };
+    const next = document.getElementById('discountEditId').value ? items.map(item => item.id === code.id ? code : item) : [code, ...items];
+    saveDiscounts(next);
+    e.target.reset();
+    document.getElementById('discountEditId').value = '';
+    document.getElementById('saveDiscountBtn').textContent = 'Save code';
+    rerender();
+  });
+  document.getElementById('categoryForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const items = getCategories();
+    const category = {
+      id: document.getElementById('categoryEditId').value || slugify(document.getElementById('categoryName').value),
+      name: document.getElementById('categoryName').value.trim(),
+      description: document.getElementById('categoryDescription').value.trim()
+    };
+    const next = document.getElementById('categoryEditId').value ? items.map(item => item.id === category.id ? category : item) : [category, ...items];
+    saveCategories(next);
+    setupSelects();
+    e.target.reset();
+    document.getElementById('categoryEditId').value = '';
+    document.getElementById('saveCategoryBtn').textContent = 'Save category';
     rerender();
   });
   document.getElementById('productForm').addEventListener('submit', e => {
@@ -687,7 +1240,7 @@
     rerender();
   });
   document.getElementById('resetInventoryBtn').addEventListener('click', () => {
-    saveInventory(sampleInventory);
+    saveInventory([]);
     localStorage.setItem(INVENTORY_VERSION_KEY, INVENTORY_VERSION);
     rerender();
   });
