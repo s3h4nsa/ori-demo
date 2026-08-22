@@ -32,6 +32,7 @@
 
   .topbar{display:flex;align-items:center;justify-content:center;position:relative;padding:22px 32px;border-bottom:1px solid var(--line);background:#fff;}
   .brand{display:flex;align-items:center;gap:8px;font-weight:800;letter-spacing:.5px;font-size:19px;color:var(--text);}
+  .brand-logo{height:28px;width:auto;display:block;}
   .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);display:inline-block;}
   .brand-lk{color:var(--text-dim);font-weight:700;font-size:14px;margin-left:2px;}
   .cart-icon{position:absolute;right:32px;top:50%;transform:translateY(-50%);}
@@ -211,6 +212,7 @@
   @media (max-width: 900px){
     .topbar{padding:16px;}
     .brand{font-size:16px;}
+    .brand-logo{height:22px;}
     .cart-icon{right:16px;}
     .cart-icon svg{width:18px;height:18px;}
 
@@ -251,7 +253,7 @@
 <body>
 
   <div class="topbar">
-    <div class="brand"><span class="dot"></span>ORIFLAME<span class="brand-lk">LK</span></div>
+    <div class="brand"><img src="assets/logo-placeholder.png" alt="Oriflame LK" class="brand-logo"></div>
     <div class="cart-icon">
       <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
     </div>
@@ -428,7 +430,7 @@
   const ORDER_KEY = 'oriflameOrders';
   const FREE_DELIVERY_AT = 3000;
   const DELIVERY_FEE = 399;
-  const WHATSAPP_NUMBER = '+94770000000';
+  const WHATSAPP_NUMBER = '+94703327530';
 
   // Helpers for storage
   function getInventoryCatalog(){
