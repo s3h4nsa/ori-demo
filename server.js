@@ -8,6 +8,9 @@ const PORT = process.env.PORT || 3000;
 const rootDir = __dirname;
 const dataDir = path.join(rootDir, 'data');
 const dbPath = path.join(dataDir, 'shop.db');
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://nhehzncyhcditfrrcnag.supabase.co';
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'sb_publishable_7ukY5lsqHvHiofPtiXg9_Q_gYjNKmZL';
+const USE_SUPABASE = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && !SUPABASE_URL.includes('YOUR-PROJECT'));
 
 fs.mkdirSync(dataDir, { recursive: true });
 
@@ -30,6 +33,9 @@ const initializeDatabase = () => {
       price TEXT,
       stock INTEGER DEFAULT 0,
       image TEXT,
+      image_url TEXT,
+      images TEXT,
+      options TEXT,
       status TEXT DEFAULT 'Active',
       description TEXT,
       source_url TEXT,
@@ -39,6 +45,7 @@ const initializeDatabase = () => {
     `CREATE TABLE IF NOT EXISTS categories (
       id TEXT PRIMARY KEY,
       name TEXT,
+      slug TEXT UNIQUE,
       description TEXT,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP,
       updated_at TEXT DEFAULT CURRENT_TIMESTAMP
@@ -91,6 +98,23 @@ const initializeDatabase = () => {
       }
     });
   });
+
+  const migrationSql = [
+    "ALTER TABLE products ADD COLUMN brand TEXT",
+    "ALTER TABLE products ADD COLUMN cat TEXT",
+    "ALTER TABLE products ADD COLUMN image_url TEXT",
+    "ALTER TABLE products ADD COLUMN images TEXT",
+    "ALTER TABLE products ADD COLUMN options TEXT",
+    "ALTER TABLE categories ADD COLUMN slug TEXT",
+  ];
+
+  migrationSql.forEach((statement) => {
+    db.run(statement, (err) => {
+      if (err && !String(err.message).includes('duplicate column name')) {
+        console.warn('Schema migration warning:', err.message);
+      }
+    });
+  });
 };
 
 const run = (sql, params = []) => new Promise((resolve, reject) => {
@@ -123,6 +147,63 @@ const parseJson = (value, fallback = []) => {
   }
 };
 
+const generateUuid = () => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (character) => {
+    const random = Math.random() * 16 | 0;
+    const value = character === 'x' ? random : (random & 0x3 | 0x8);
+    return value.toString(16);
+  });
+};
+
+const supabaseRequest = async (path, options = {}) => {
+  if (!USE_SUPABASE) throw new Error('Supabase not configured.');
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    apikey: SUPABASE_ANON_KEY,
+    Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+    ...(options.headers || {})
+  };
+
+  const response = await fetch(`${SUPABASE_URL}${path}`, {
+    method: options.method || 'GET',
+    headers,
+    body: options.body !== undefined
+      ? (typeof options.body === 'string' ? options.body : JSON.stringify(options.body))
+      : undefined,
+  });
+
+  const text = await response.text();
+  if (!response.ok) {
+    throw new Error(text || `Supabase request failed: ${response.status}`);
+  }
+  return text ? JSON.parse(text) : null;
+};
+
+const forwardedSupabaseHeaders = (req) => ({
+  ...(req.headers.authorization ? { Authorization: req.headers.authorization } : {})
+});
+
+const normalizeSupabaseProduct = (row, categoryMap = {}) => ({
+  id: row.id,
+  slug: row.slug || row.name || row.id,
+  name: row.name || 'Product',
+  brand: row.brand || 'Oriflame LK',
+  cat: row.cat || categoryMap[row.category_id] || 'Makeup',
+  price: row.price ?? 'Rs. 0',
+  stock: Number(row.stock || 0),
+  image: row.image_url || row.image || 'productImage.webp',
+  images: parseJson(row.images, [row.image_url || row.image || 'productImage.webp']),
+  options: parseJson(row.options, {}),
+  status: row.status || (Number(row.stock || 0) <= 0 ? 'Out of stock' : 'Active'),
+  description: row.description || '',
+  sourceUrl: row.source_url || '',
+  desc: row.description || `${row.name || 'Product'} is available from our ${row.cat || 'shop'} collection.`
+});
+
 const normalizeProduct = (row) => ({
   id: row.id,
   slug: row.slug,
@@ -131,7 +212,9 @@ const normalizeProduct = (row) => ({
   cat: row.cat,
   price: row.price,
   stock: Number(row.stock || 0),
-  image: row.image,
+  image: row.image_url || row.image || 'productImage.webp',
+  images: parseJson(row.images, [row.image_url || row.image || 'productImage.webp']),
+  options: parseJson(row.options, {}),
   status: row.status,
   description: row.description,
   sourceUrl: row.source_url,
@@ -139,22 +222,28 @@ const normalizeProduct = (row) => ({
 });
 
 const normalizeCategory = (row) => ({
-  id: row.id,
-  name: row.name,
-  description: row.description
+  id: row.id || row.name || `cat-${Math.random().toString(16).slice(2)}`,
+  slug: row.slug || (row.name || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || undefined,
+  name: row.name || row.cat || 'Category',
+  description: row.description || ''
 });
 
-const normalizeHero = (row) => ({
-  id: row.id,
-  productSlug: row.productSlug,
-  eyebrow: row.eyebrow,
-  title: row.title,
-  description: row.description,
-  image: row.image,
-  theme: row.theme,
-  themeColor: row.themeColor,
-  price: row.price,
-  href: row.href
+const categoryNameFromProduct = (value) => {
+  const raw = String(value || '').trim();
+  return raw.replace(/\s+/g, ' ');
+};
+
+const normalizeHero = (row = {}) => ({
+  id: row.id || row.hero_id || generateUuid(),
+  productSlug: row.productSlug || row.productslug || '',
+  eyebrow: row.eyebrow || '',
+  title: row.title || 'Featured offer',
+  description: row.description || '',
+  image: row.image || row.image_url || 'productImage.webp',
+  theme: row.theme || 'custom',
+  themeColor: row.themeColor || row.themecolor || '#cdeaa4',
+  price: row.price || 'Shop now',
+  href: row.href || 'index.html'
 });
 
 const normalizeDiscount = (row) => ({
@@ -191,6 +280,18 @@ app.get('/api/health', (req, res) => {
 
 app.get('/api/products', async (req, res) => {
   try {
+    if (USE_SUPABASE) {
+      try {
+        const categoryRows = await supabaseRequest('/rest/v1/categories?select=*');
+        const categoryMap = Object.fromEntries((categoryRows || []).map((row) => [row.id, row.name || row.slug || 'Makeup']));
+        const rows = await supabaseRequest('/rest/v1/products?select=*');
+        res.json((rows || []).map((row) => normalizeSupabaseProduct(row, categoryMap)));
+        return;
+      } catch (supabaseError) {
+        console.warn('Supabase products unavailable; using SQLite:', supabaseError.message);
+      }
+    }
+
     const rows = await all('SELECT * FROM products ORDER BY updated_at DESC, created_at DESC');
     res.json(rows.map(normalizeProduct));
   } catch (err) {
@@ -200,12 +301,33 @@ app.get('/api/products', async (req, res) => {
 
 app.post('/api/products', async (req, res) => {
   try {
+    if (USE_SUPABASE) {
+      const product = req.body || {};
+      const payload = {
+        id: product.id || generateUuid(),
+        name: product.name || 'Product',
+        slug: product.slug || String(product.name || 'product').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+        brand: product.brand || 'Oriflame LK',
+        sku: product.sku || `SKU-${Date.now()}`,
+        category_id: product.category_id || null,
+        price: Number(String(product.price || 0).replace(/[^\d.-]/g, '')) || 0,
+        stock: Number(product.stock || 0),
+        image_url: product.image || product.image_url || 'productImage.webp',
+        status: String(product.status || 'active').toLowerCase().replace(/\s+/g, '_'),
+        description: product.description || product.desc || ''
+      };
+      const result = await supabaseRequest('/rest/v1/products', { method: 'POST', body: payload, headers: { Prefer: 'return=representation', ...forwardedSupabaseHeaders(req) }});
+      res.json({ success: true, id: payload.id, data: result });
+      return;
+    }
+
     const product = req.body || {};
-    const id = product.id || `prod-${Date.now()}`;
+    const id = product.id || generateUuid();
     const slug = product.slug || product.name || id;
+    const imageValue = product.image_url || product.image || 'productImage.webp';
     await run(
-      `INSERT INTO products (id, slug, name, brand, cat, price, stock, image, status, description, source_url, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      `INSERT INTO products (id, slug, name, brand, cat, price, stock, image, image_url, images, options, status, description, source_url, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
        ON CONFLICT(id) DO UPDATE SET
          slug = excluded.slug,
          name = excluded.name,
@@ -214,6 +336,9 @@ app.post('/api/products', async (req, res) => {
          price = excluded.price,
          stock = excluded.stock,
          image = excluded.image,
+         image_url = excluded.image_url,
+         images = excluded.images,
+         options = excluded.options,
          status = excluded.status,
          description = excluded.description,
          source_url = excluded.source_url,
@@ -226,7 +351,10 @@ app.post('/api/products', async (req, res) => {
         product.cat || 'Skincare',
         product.price || 'Rs. 0',
         Number(product.stock || 0),
-        product.image || 'productImage.webp',
+        imageValue,
+        imageValue,
+        JSON.stringify(Array.isArray(product.images) && product.images.length ? product.images : [imageValue]),
+        JSON.stringify(product.options && typeof product.options === 'object' ? product.options : {}),
         product.status || 'Active',
         product.description || product.desc || '',
         product.sourceUrl || '',
@@ -240,9 +368,29 @@ app.post('/api/products', async (req, res) => {
 
 app.put('/api/products/:id', async (req, res) => {
   try {
+    if (USE_SUPABASE) {
+      const product = req.body || {};
+      const payload = {
+        name: product.name || 'Product',
+        slug: product.slug || String(product.name || req.params.id).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+        brand: product.brand || 'Oriflame LK',
+        sku: product.sku || `SKU-${Date.now()}`,
+        category_id: product.category_id || null,
+        price: Number(String(product.price || 0).replace(/[^\d.-]/g, '')) || 0,
+        stock: Number(product.stock || 0),
+        image_url: product.image || product.image_url || 'productImage.webp',
+        status: String(product.status || 'active').toLowerCase().replace(/\s+/g, '_'),
+        description: product.description || product.desc || ''
+      };
+      await supabaseRequest(`/rest/v1/products?id=eq.${req.params.id}`, { method: 'PATCH', body: payload, headers: forwardedSupabaseHeaders(req) });
+      res.json({ success: true, id: req.params.id });
+      return;
+    }
+
     const product = req.body || {};
     const id = req.params.id;
     const nextSlug = product.slug || id;
+    const imageValue = product.image_url || product.image || 'productImage.webp';
     await run(
       `UPDATE products SET
         slug = ?,
@@ -252,6 +400,9 @@ app.put('/api/products/:id', async (req, res) => {
         price = ?,
         stock = ?,
         image = ?,
+        image_url = ?,
+        images = ?,
+        options = ?,
         status = ?,
         description = ?,
         source_url = ?,
@@ -264,7 +415,10 @@ app.put('/api/products/:id', async (req, res) => {
         product.cat || 'Skincare',
         product.price || 'Rs. 0',
         Number(product.stock || 0),
-        product.image || 'productImage.webp',
+        imageValue,
+        imageValue,
+        JSON.stringify(Array.isArray(product.images) && product.images.length ? product.images : [imageValue]),
+        JSON.stringify(product.options && typeof product.options === 'object' ? product.options : {}),
         product.status || 'Active',
         product.description || product.desc || '',
         product.sourceUrl || '',
@@ -279,6 +433,12 @@ app.put('/api/products/:id', async (req, res) => {
 
 app.delete('/api/products/:id', async (req, res) => {
   try {
+    if (USE_SUPABASE) {
+      await supabaseRequest(`/rest/v1/products?id=eq.${req.params.id}`, { method: 'DELETE' });
+      res.json({ success: true });
+      return;
+    }
+
     await run('DELETE FROM products WHERE id = ?', [req.params.id]);
     res.json({ success: true });
   } catch (err) {
@@ -288,8 +448,48 @@ app.delete('/api/products/:id', async (req, res) => {
 
 app.get('/api/categories', async (req, res) => {
   try {
+    if (USE_SUPABASE) {
+      try {
+        const rows = await supabaseRequest('/rest/v1/categories?select=*');
+        const categories = (rows || []).map((row) => normalizeCategory({ id: row.id, name: row.name || row.slug || 'Category', description: row.description || '' }));
+        const seen = new Set();
+        const list = [];
+        for (const category of categories) {
+          const name = categoryNameFromProduct(category.name);
+          if (!name || seen.has(name.toLowerCase())) continue;
+          seen.add(name.toLowerCase());
+          list.push({ ...category, name });
+        }
+        res.json(list);
+        return;
+      } catch (supabaseError) {
+        console.warn('Supabase categories unavailable; using SQLite:', supabaseError.message);
+      }
+    }
+
     const rows = await all('SELECT * FROM categories ORDER BY updated_at DESC');
-    res.json(rows.map(normalizeCategory));
+    const categories = rows.map(normalizeCategory);
+    const seen = new Set();
+    const list = [];
+
+    for (const category of categories) {
+      const name = categoryNameFromProduct(category.name);
+      if (!name || seen.has(name.toLowerCase())) continue;
+      seen.add(name.toLowerCase());
+      list.push({ ...category, name });
+    }
+
+    if (!list.length) {
+      const productRows = await all("SELECT DISTINCT cat FROM products WHERE TRIM(COALESCE(cat, '')) <> '' ORDER BY cat ASC");
+      for (const row of productRows) {
+        const name = categoryNameFromProduct(row.cat);
+        if (!name || seen.has(name.toLowerCase())) continue;
+        seen.add(name.toLowerCase());
+        list.push({ id: `product-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`, name, description: '' });
+      }
+    }
+
+    res.json(list);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -298,17 +498,29 @@ app.get('/api/categories', async (req, res) => {
 app.post('/api/categories', async (req, res) => {
   try {
     const category = req.body || {};
-    const id = category.id || category.name || `cat-${Date.now()}`;
+    const id = category.id || category.slug || category.name || `cat-${Date.now()}`;
+    const slug = category.slug || (category.name || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || id;
+    if (USE_SUPABASE) {
+      const payload = { id, name: category.name || 'Category', slug, description: category.description || '' };
+      const result = await supabaseRequest('/rest/v1/categories', {
+        method: 'POST',
+        body: payload,
+        headers: { Prefer: 'return=representation' }
+      });
+      res.json({ success: true, id, slug, data: result });
+      return;
+    }
     await run(
-      `INSERT INTO categories (id, name, description, updated_at)
-       VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+      `INSERT INTO categories (id, name, slug, description, updated_at)
+       VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
        ON CONFLICT(id) DO UPDATE SET
          name = excluded.name,
+         slug = excluded.slug,
          description = excluded.description,
          updated_at = CURRENT_TIMESTAMP`,
-      [id, category.name || 'Category', category.description || '']
+      [id, category.name || 'Category', slug, category.description || '']
     );
-    res.json({ success: true, id });
+    res.json({ success: true, id, slug });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -317,9 +529,26 @@ app.post('/api/categories', async (req, res) => {
 app.put('/api/categories/:id', async (req, res) => {
   try {
     const category = req.body || {};
+    if (USE_SUPABASE) {
+      await supabaseRequest(`/rest/v1/categories?id=eq.${encodeURIComponent(req.params.id)}`, {
+        method: 'PATCH',
+        body: {
+          name: category.name || 'Category',
+          slug: category.slug || (category.name || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+          description: category.description || ''
+        }
+      });
+      res.json({ success: true, id: req.params.id });
+      return;
+    }
     await run(
-      'UPDATE categories SET name = ?, description = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-      [category.name || 'Category', category.description || '', req.params.id]
+      'UPDATE categories SET name = ?, slug = ?, description = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+      [
+        category.name || 'Category',
+        category.slug || (category.name || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+        category.description || '',
+        req.params.id
+      ]
     );
     res.json({ success: true });
   } catch (err) {
@@ -329,6 +558,11 @@ app.put('/api/categories/:id', async (req, res) => {
 
 app.delete('/api/categories/:id', async (req, res) => {
   try {
+    if (USE_SUPABASE) {
+      await supabaseRequest(`/rest/v1/categories?id=eq.${encodeURIComponent(req.params.id)}`, { method: 'DELETE' });
+      res.json({ success: true });
+      return;
+    }
     await run('DELETE FROM categories WHERE id = ?', [req.params.id]);
     res.json({ success: true });
   } catch (err) {
@@ -338,6 +572,11 @@ app.delete('/api/categories/:id', async (req, res) => {
 
 app.get('/api/hero', async (req, res) => {
   try {
+    if (USE_SUPABASE) {
+      const rows = await supabaseRequest('/rest/v1/hero_slides?select=*');
+      res.json((rows || []).map(normalizeHero));
+      return;
+    }
     const rows = await all('SELECT * FROM hero_slides ORDER BY updated_at DESC');
     res.json(rows.map(normalizeHero));
   } catch (err) {
@@ -348,7 +587,23 @@ app.get('/api/hero', async (req, res) => {
 app.post('/api/hero', async (req, res) => {
   try {
     const hero = req.body || {};
-    const id = hero.id || `hero-${Date.now()}`;
+    const id = hero.id || generateUuid();
+    if (USE_SUPABASE) {
+      await supabaseRequest('/rest/v1/hero_slides', { method: 'POST', body: {
+        id,
+        productslug: hero.productSlug || hero.productslug || '',
+        eyebrow: hero.eyebrow || '',
+        title: hero.title || 'Featured offer',
+        description: hero.description || '',
+        image: hero.image || 'productImage.webp',
+        theme: hero.theme || 'custom',
+        themecolor: hero.themeColor || hero.themecolor || '#cdeaa4',
+        price: hero.price || 'Shop now',
+        href: hero.href || 'index.html'
+      }, headers: forwardedSupabaseHeaders(req) });
+      res.json({ success: true, id });
+      return;
+    }
     await run(
       `INSERT INTO hero_slides (id, productSlug, eyebrow, title, description, image, theme, themeColor, price, href, updated_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
@@ -385,6 +640,25 @@ app.post('/api/hero', async (req, res) => {
 app.put('/api/hero/:id', async (req, res) => {
   try {
     const hero = req.body || {};
+    if (USE_SUPABASE) {
+      await supabaseRequest(`/rest/v1/hero_slides?id=eq.${encodeURIComponent(req.params.id)}`, {
+        method: 'PATCH',
+        body: {
+          productslug: hero.productSlug || hero.productslug || '',
+          eyebrow: hero.eyebrow || '',
+          title: hero.title || 'Featured offer',
+          description: hero.description || '',
+          image: hero.image || 'productImage.webp',
+          theme: hero.theme || 'custom',
+          themecolor: hero.themeColor || hero.themecolor || '#cdeaa4',
+          price: hero.price || 'Shop now',
+          href: hero.href || 'index.html'
+        },
+        headers: forwardedSupabaseHeaders(req)
+      });
+      res.json({ success: true, id: req.params.id });
+      return;
+    }
     await run(
       `UPDATE hero_slides SET
         productSlug = ?,
@@ -419,6 +693,11 @@ app.put('/api/hero/:id', async (req, res) => {
 
 app.delete('/api/hero/:id', async (req, res) => {
   try {
+    if (USE_SUPABASE) {
+      await supabaseRequest(`/rest/v1/hero_slides?id=eq.${encodeURIComponent(req.params.id)}`, { method: 'DELETE' });
+      res.json({ success: true });
+      return;
+    }
     await run('DELETE FROM hero_slides WHERE id = ?', [req.params.id]);
     res.json({ success: true });
   } catch (err) {
@@ -428,6 +707,11 @@ app.delete('/api/hero/:id', async (req, res) => {
 
 app.get('/api/discounts', async (req, res) => {
   try {
+    if (USE_SUPABASE) {
+      const rows = await supabaseRequest('/rest/v1/discount_codes?select=*');
+      res.json((rows || []).map(normalizeDiscount));
+      return;
+    }
     const rows = await all('SELECT * FROM discount_codes ORDER BY updated_at DESC');
     res.json(rows.map(normalizeDiscount));
   } catch (err) {
@@ -438,7 +722,12 @@ app.get('/api/discounts', async (req, res) => {
 app.post('/api/discounts', async (req, res) => {
   try {
     const code = req.body || {};
-    const id = code.id || `disc-${Date.now()}`;
+    const id = code.id || generateUuid();
+    if (USE_SUPABASE) {
+      await supabaseRequest('/rest/v1/discount_codes', { method: 'POST', body: { id, code: (code.code || '').toUpperCase(), title: code.title || '', type: code.type || 'percent', value: Number(code.value || 0), active: !!code.active } });
+      res.json({ success: true, id });
+      return;
+    }
     await run(
       `INSERT INTO discount_codes (id, code, title, type, value, active, updated_at)
        VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
@@ -472,6 +761,11 @@ app.put('/api/discounts/:id', async (req, res) => {
 
 app.delete('/api/discounts/:id', async (req, res) => {
   try {
+    if (USE_SUPABASE) {
+      await supabaseRequest(`/rest/v1/discount_codes?id=eq.${encodeURIComponent(req.params.id)}`, { method: 'DELETE' });
+      res.json({ success: true });
+      return;
+    }
     await run('DELETE FROM discount_codes WHERE id = ?', [req.params.id]);
     res.json({ success: true });
   } catch (err) {
@@ -598,14 +892,49 @@ app.post('/api/collections/:collection', async (req, res) => {
       return res.status(400).json({ message: 'Unsupported collection.' });
     }
 
+    if (USE_SUPABASE) {
+      const tableName = target === 'products' ? 'products' : target === 'categories' ? 'categories' : target === 'hero_slides' ? 'hero_slides' : target === 'discount_codes' ? 'discount_codes' : target;
+      await supabaseRequest(`/rest/v1/${tableName}?select=*`, { method: 'GET' });
+      for (const item of payload) {
+        const existing = await supabaseRequest(`/rest/v1/${tableName}?select=*`);
+        const match = existing.find((row) => row.id === (item.id || row.id));
+        const requestBody = {
+          id: item.id || item.slug || `local-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+          ...item,
+          slug: item.slug || item.name || item.id || `local-${Date.now()}`,
+          name: item.name || item.title || 'Product',
+          price: item.price || item.value || 'Rs. 0',
+          stock: Number(item.stock || 0),
+          image_url: item.image_url || item.image || 'productImage.webp',
+          images: JSON.stringify(Array.isArray(item.images) && item.images.length ? item.images : [item.image_url || item.image || 'productImage.webp']),
+          options: JSON.stringify(item.options && typeof item.options === 'object' ? item.options : {}),
+          description: item.description || item.desc || '',
+          status: item.status || 'Active',
+          code: (item.code || '').toUpperCase(),
+          value: Number(item.value || item.price || 0),
+          active: item.active !== false,
+          title: item.title || item.name || 'Offer',
+          href: item.href || 'index.html',
+          themeColor: item.themeColor || '#cdeaa4'
+        };
+        if (match) {
+          await supabaseRequest(`/rest/v1/${tableName}?id=eq.${match.id}`, { method: 'PATCH', body: requestBody });
+        } else {
+          await supabaseRequest(`/rest/v1/${tableName}`, { method: 'POST', body: requestBody });
+        }
+      }
+      res.json({ success: true });
+      return;
+    }
+
     if (target === 'products') {
       await run('DELETE FROM products');
       for (const item of payload) {
         const id = item.id || item.slug || `prod-${Date.now()}-${Math.random().toString(16).slice(2)}`;
         await run(
-          `INSERT INTO products (id, slug, name, brand, cat, price, stock, image, status, description, source_url, updated_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
-          [id, item.slug || id, item.name || 'Product', item.brand || 'Oriflame', item.cat || 'Skincare', item.price || 'Rs. 0', Number(item.stock || 0), item.image || 'productImage.webp', item.status || 'Active', item.description || item.desc || '', item.sourceUrl || '']
+          `INSERT INTO products (id, slug, name, brand, cat, price, stock, image, images, options, status, description, source_url, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
+          [id, item.slug || id, item.name || 'Product', item.brand || 'Oriflame', item.cat || 'Skincare', item.price || 'Rs. 0', Number(item.stock || 0), item.image || 'productImage.webp', JSON.stringify(Array.isArray(item.images) && item.images.length ? item.images : [item.image || 'productImage.webp']), JSON.stringify(item.options && typeof item.options === 'object' ? item.options : {}), item.status || 'Active', item.description || item.desc || '', item.sourceUrl || '']
         );
       }
     }

@@ -6,6 +6,7 @@
 <title>Track Your Order — Oriflame LK</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site-header.css">
 <style>
   /* ===========================================================
      Same design tokens as index.html — keep both files in sync
@@ -56,6 +57,7 @@
   .topnav .wrap{display:flex; align-items:center; justify-content:space-between; height:78px;}
   .brand{display:flex; align-items:center; gap:10px; font-weight:800; font-size:20px; letter-spacing:-.02em;}
   .brand .dot{width:10px; height:10px; border-radius:50%; background:linear-gradient(135deg,var(--green-a),var(--green-b));}
+  .brand-logo{display:block; width:auto; height:28px; object-fit:contain;}
   .brand-lk{
     font-size:10px; font-weight:800; background:var(--black); color:#fff;
     padding:2px 6px; border-radius:5px; margin-left:2px; letter-spacing:.03em; vertical-align:2px;
@@ -302,7 +304,7 @@
   <!-- Desktop top nav -->
   <header class="topnav">
     <div class="wrap">
-      <a href="index.html" class="brand"><span class="dot"></span>ORIFLAME<span class="brand-lk">LK</span></a>
+      <a href="index.html" class="brand" aria-label="Oriflame LK home"><img src="assets/logo-placeholder.png" alt="Oriflame LK" class="brand-logo"></a>
       <nav class="nav-links">
         <a href="index.html">Shop</a>
         <a href="track.html" class="active">Track order</a>
@@ -388,7 +390,7 @@
   <footer class="site-footer">
     <div class="wrap">
       <div class="footer-col">
-        <div class="brand" style="margin-bottom:10px;"><span class="dot"></span>ORIFLAME<span class="brand-lk">LK</span></div>
+        <a href="index.html" class="brand" aria-label="Oriflame LK home" style="margin-bottom:10px;"><img src="assets/logo-placeholder.png" alt="Oriflame LK" class="brand-logo"></a>
         <p style="font-size:13px; color:var(--muted); max-width:220px; line-height:1.5;">Skincare, makeup and fragrance curated in Sri Lanka with simple ordering, local delivery and WhatsApp support.</p>
       </div>
       <div class="footer-col">
@@ -559,5 +561,6 @@ document.getElementById("waybill").addEventListener("keydown", e => {
 });
 </script>
 
+  <script src="site-header.js"></script>
 </body>
 </html>

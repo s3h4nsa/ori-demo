@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" maximum-scale="1.0">
   <title>Oriflame — Cart</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="site-header.css">
   <style>
     :root{
       --bg:#ffffff;
@@ -225,7 +226,10 @@
     const DELIVERY_FEE = 399;
 
     function getInventoryCatalog(){
-      try { return JSON.parse(localStorage.getItem(INVENTORY_KEY)) || []; } catch { return []; }
+      try {
+        const storage = window.sessionStorage || window.localStorage;
+        return JSON.parse(storage.getItem(INVENTORY_KEY)) || [];
+      } catch { return []; }
     }
     function normalizeProduct(item){
       const status = item.status || (Number(item.stock) <= 0 ? 'Out of stock' : 'Active');
@@ -235,6 +239,7 @@
         name: item.name || 'Product',
         price: item.price || 'Rs. 0',
         image: item.image || 'productImage.webp',
+        images: Array.isArray(item.images) && item.images.length ? item.images : [item.image || 'productImage.webp'],
         tag: status === 'Out of stock' ? 'OUT OF STOCK' : status === 'Low stock' ? 'LOW STOCK' : item.tag || null,
         status
       };
@@ -245,7 +250,10 @@
     function getCart(){
       try { return JSON.parse(localStorage.getItem(CART_KEY)) || []; } catch { return []; }
     }
-    function saveCart(cart){ localStorage.setItem(CART_KEY, JSON.stringify(cart)); }
+    function saveCart(cart){
+      localStorage.setItem(CART_KEY, JSON.stringify(cart));
+      window.dispatchEvent(new CustomEvent('oriflame:cart-updated'));
+    }
 
     function priceNumber(price){ return Number(String(price).replace(/[^\d]/g, '')) || 0; }
     function money(value){ return `Rs ${value.toLocaleString('en-US')}`; }
@@ -276,20 +284,20 @@
       if (mobileCountEl) mobileCountEl.textContent = count;
     }
 
-    function removeFromCart(slug){
-      const cart = getCart().filter(item => item.slug !== slug);
+    function removeFromCart(index){
+      const cart = getCart();
+      cart.splice(Number(index), 1);
       saveCart(cart);
       renderCart();
     }
 
-    function updateQty(slug, change){
+    function updateQty(index, change){
       const cart = getCart();
-      const index = cart.findIndex(item => item.slug === slug);
-      if (index === -1) return;
-
-      const current = cart[index];
+      const cartIndex = Number(index);
+      const current = cart[cartIndex];
+      if (!current) return;
       const nextQty = (current.qty || 0) + change;
-      const maxAvailable = getAvailableStock(slug);
+      const maxAvailable = getAvailableStock(current.slug);
 
       if (change > 0 && maxAvailable > 0 && nextQty > maxAvailable) {
         alert(`Only ${maxAvailable} item${maxAvailable === 1 ? '' : 's'} left in stock for this product.`);
@@ -297,7 +305,7 @@
       }
 
       if (nextQty <= 0) {
-        cart.splice(index, 1);
+        cart.splice(cartIndex, 1);
       } else {
         cart[index].qty = nextQty;
       }
@@ -329,7 +337,7 @@
       }
 
       emptyState.hidden = true;
-      cartItems.innerHTML = lines.map(line => `
+      cartItems.innerHTML = lines.map((line, lineIndex) => `
         <article class="cart-product">
           <div class="product-thumb">
             <img src="${line.product.image}" alt="${line.product.name}">
@@ -340,17 +348,18 @@
                 <div class="product-brand">${line.product.brand}</div>
                 <h3 class="product-name">${line.product.name}</h3>
               </div>
-              <button class="remove-btn" type="button" data-remove="${line.slug}">Remove</button>
+              <button class="remove-btn" type="button" data-remove="${lineIndex}">Remove</button>
             </div>
             <div class="product-meta">
               <span>${money(priceNumber(line.product.price))}</span>
+              ${line.options && Object.keys(line.options).length ? `<span>${Object.entries(line.options).map(([name, value]) => `${name}: ${value}`).join(' · ')}</span>` : ''}
               ${line.product.tag ? `<span class="tag">${line.product.tag}</span>` : ''}
             </div>
             <div class="bottom-row">
               <div class="qty-control" aria-label="Quantity selector">
-                <button class="qty-btn" type="button" data-decrease="${line.slug}" aria-label="Decrease quantity">−</button>
+                <button class="qty-btn" type="button" data-decrease="${lineIndex}" aria-label="Decrease quantity">−</button>
                 <span class="qty-value">${line.qty}</span>
-                <button class="qty-btn" type="button" data-increase="${line.slug}" aria-label="Increase quantity">+</button>
+                <button class="qty-btn" type="button" data-increase="${lineIndex}" aria-label="Increase quantity">+</button>
               </div>
               <div class="price">${money(priceNumber(line.product.price) * line.qty)}</div>
             </div>
@@ -393,5 +402,6 @@
 
     renderCart();
   </script>
+  <script src="site-header.js"></script>
 </body>
 </html>

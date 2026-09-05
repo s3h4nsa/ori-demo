@@ -6,6 +6,7 @@
 <title>Oriflame Sri Lanka — Skincare, Makeup & Fragrance</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site-header.css">
 <style>
   :root{
     --bg:#ffffff;
@@ -48,17 +49,17 @@
   .topnav .wrap{display:flex; align-items:center; justify-content:space-between; height:78px;}
   .brand{display:flex; align-items:center; gap:10px; font-weight:800; font-size:20px; letter-spacing:-.02em;}
   .brand .dot{width:10px; height:10px; border-radius:50%; background:linear-gradient(135deg,var(--green-a),var(--green-b));}
+  .brand-logo{display:block; width:auto; height:36px; object-fit:contain;}
   .brand-lk{
     font-size:10px; font-weight:800; background:var(--black); color:#fff;
     padding:2px 6px; border-radius:5px; margin-left:2px; letter-spacing:.03em; vertical-align:2px;
   }
-  .nav-links{display:flex; gap:34px; font-weight:600; font-size:14.5px; color:var(--ink);}
-  .nav-links a{opacity:.7; transition:opacity .15s;}
-  .nav-links a:hover{opacity:1;}
-  .nav-right{display:flex; align-items:center; gap:18px;}
+  .nav-links{display:none;}
+  .nav-right{display:flex; align-items:center; gap:14px; margin-left:auto;}
   .icon-btn{
     width:42px; height:42px; border-radius:50%; border:1px solid var(--line);
     display:flex; align-items:center; justify-content:center; background:#fff; position:relative;
+    box-shadow:0 2px 8px rgba(20,20,20,.04);
   }
   .icon-btn svg{width:18px; height:18px;}
   .badge{
@@ -332,18 +333,13 @@
   <!-- Desktop top nav -->
   <header class="topnav">
     <div class="wrap">
-      <div class="brand"><span class="dot"></span>ORIFLAME<span class="brand-lk">LK</span></div>
-      <nav class="nav-links">
-        <a href="categories.html?cat=Skincare" data-nav-cat="Skincare">Skincare</a>
-        <a href="categories.html?cat=Makeup" data-nav-cat="Makeup">Makeup</a>
-        <a href="categories.html?cat=Fragrance" data-nav-cat="Fragrance">Fragrance</a>
-        <a href="categories.html?cat=Hair" data-nav-cat="Hair">Hair</a>
-        <a href="categories.html?cat=Bath &amp; Body" data-nav-cat="Bath & Body">Bath &amp; Body</a>
-        <a href="#new-arrivals">New arrivals</a>
-        <a href="track.html">Track order</a>
-      </nav>
+      <a href="index.html" class="brand" aria-label="Oriflame LK home"><img src="assets/logo-placeholder.png" alt="Oriflame LK" class="brand-logo"></a>
+      <nav class="nav-links" aria-label="Primary navigation" style="display:none;"></nav>
       <div class="nav-right">
-        <a href="cart.html" class="icon-btn" aria-label="Bag" id="desktopBagBtn">
+      <a href="track.html" class="icon-btn" aria-label="Track order">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+      </a>
+      <a href="cart.html" class="icon-btn" aria-label="Bag" id="desktopBagBtn">
           <svg viewBox="0 0 24 24" fill="none" stroke="#141414" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
           <span class="badge" id="desktopBagCount">0</span>
         </a>
@@ -363,7 +359,7 @@
   <!-- Mobile header -->
   <div class="mobile-header">
     <div class="row">
-      <img class="brand-placeholder" src="assets/logo-placeholder.png" alt="Logo placeholder">
+      <a href="index.html" aria-label="Oriflame LK home"><img class="brand-placeholder" src="assets/logo-placeholder.png" alt="Oriflame LK logo"></a>
       <button class="search-btn" aria-label="Search" data-search-trigger>
         <svg viewBox="0 0 24 24" fill="none" stroke="#141414" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       </button>
@@ -387,7 +383,7 @@
   </div>
 
   <!-- Desktop hello bar -->
-  <div class="hello-bar"><img class="brand-placeholder" src="assets/logo-placeholder.png" alt="Logo placeholder"></div>
+  <div class="hello-bar"><a href="index.html" aria-label="Oriflame LK home"><img class="brand-placeholder" src="assets/logo-placeholder.png" alt="Oriflame LK logo"></a></div>
 
   <!-- Hero carousel -->
   <section class="hero-section">
@@ -401,14 +397,7 @@
       <div class="section-title">Categories</div>
       <a href="#new-arrivals" class="see-all">See all</a>
     </div>
-    <div class="cat-scroll">
-      <button class="cat-pill active" data-cat="All">All</button>
-      <button class="cat-pill" data-cat="Fragrance">Fragrance</button>
-      <button class="cat-pill" data-cat="Makeup">Makeup</button>
-      <button class="cat-pill" data-cat="Hair">Hair</button>
-      <button class="cat-pill" data-cat="Skincare">Skincare</button>
-      <button class="cat-pill" data-cat="Bath &amp; Body">Bath &amp; Body</button>
-    </div>
+    <div class="cat-scroll" id="categoryPills"></div>
 
     <!-- Category results — shown only when a specific category is picked -->
     <div id="categoryResults" style="display:none;">
@@ -446,7 +435,7 @@
   <footer class="site-footer">
     <div class="wrap">
       <div class="footer-col">
-        <div class="brand" style="margin-bottom:10px;"><span class="dot"></span>ORIFLAME<span class="brand-lk">LK</span></div>
+        <div class="brand" style="margin-bottom:10px;"><img src="assets/logo-placeholder.png" alt="Oriflame LK" class="brand-logo"></div>
         <p style="font-size:13px; color:var(--muted); max-width:220px; line-height:1.5;">Skincare, makeup and fragrance curated in Sri Lanka with simple ordering, local delivery and WhatsApp support.</p>
       </div>
       <div class="footer-col">
@@ -500,21 +489,52 @@
   const INVENTORY_KEY = 'oriflameInventory';
   const HERO_KEY = 'oriflameHeroSlides';
   const DISCOUNT_KEY = 'oriflameDiscountCodes';
+  const SUPABASE_URL = 'https://nhehzncyhcditfrrcnag.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_7ukY5lsqHvHiofPtiXg9_Q_gYjNKmZL';
   const DEFAULT_HERO_SLIDES = [];
   const DEFAULT_DISCOUNTS = [];
   function readStorage(key, fallback){
     try {
-      const value = JSON.parse(localStorage.getItem(key));
+      const storage = window.sessionStorage || window.localStorage;
+      const value = JSON.parse(storage.getItem(key));
       return value && value.length ? value : fallback;
     } catch {
       return fallback;
     }
   }
-  function getHeroSlides(){
+  async function fetchSupabaseTable(table, fallback = []){
+    try {
+      if (window.location.protocol !== 'file:') {
+        const apiResponse = await fetch(`/api/${table}`);
+        if (apiResponse.ok) {
+          const apiData = await apiResponse.json();
+          if (Array.isArray(apiData)) return apiData;
+        }
+      }
+      const headers = {
+        apikey: SUPABASE_KEY,
+        Accept: 'application/json'
+      };
+      if (window.location.protocol !== 'file:') {
+        headers.Authorization = 'Bearer ' + SUPABASE_KEY;
+      }
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?select=*`, { headers });
+      if (!response.ok) return fallback;
+      const data = await response.json();
+      return Array.isArray(data) ? data : fallback;
+    } catch {
+      return fallback;
+    }
+  }
+  async function getHeroSlides(){
+    const supabaseSlides = await fetchSupabaseTable('hero_slides', []);
+    if (supabaseSlides.length) return supabaseSlides;
     return readStorage(HERO_KEY, DEFAULT_HERO_SLIDES);
   }
-  function getDiscounts(){
-    return readStorage(DISCOUNT_KEY, DEFAULT_DISCOUNTS).filter(code => code.active !== false);
+  async function getDiscounts(){
+    const supabaseDiscounts = await fetchSupabaseTable('discount_codes', []);
+    const source = supabaseDiscounts.length ? supabaseDiscounts : readStorage(DISCOUNT_KEY, DEFAULT_DISCOUNTS);
+    return source.filter(code => code.active !== false);
   }
   function hexToRgb(hex){
     const clean = (hex || '#cdeaa4').replace('#','');
@@ -540,10 +560,23 @@
     if (!product || !product.cat) return 'green';
     return ['Skincare', 'Fragrance', 'Hair'].includes(product.cat) ? 'green' : 'clay';
   }
-  function resolveHeroSlide(slide){
-    const productSlug = slide.productSlug || (slide.href || '').match(/[?&]item=([^&]+)/)?.[1];
-    const product = getInventoryCatalog().find(item => item.slug === productSlug);
-    if (!product) return slide;
+  async function resolveHeroSlide(slide){
+    const rawProductSlug = slide.productSlug || slide.productslug || (slide.href || '').match(/[?&]item=([^&]+)/)?.[1] || '';
+    const productSlug = String(rawProductSlug || '').trim();
+    const catalog = await getInventoryCatalog();
+    const product = catalog.find(item => item.slug === productSlug || item.slug === String(slide.productslug || '').trim());
+    if (!product) return {
+      ...slide,
+      eyebrow: slide.eyebrow || 'Oriflame',
+      title: slide.title || 'Featured offer',
+      description: slide.description || '',
+      image: slide.image || 'productImage.webp',
+      price: slide.price || 'Shop now',
+      href: slide.href || 'index.html',
+      theme: slide.theme || 'green',
+      themeColor: slide.themeColor || slide.themecolor || '#cdeaa4',
+      productSlug: slide.productSlug || slide.productslug || ''
+    };
     return {
       ...slide,
       eyebrow: slide.eyebrow || product.brand || 'Oriflame',
@@ -553,12 +586,12 @@
       price: slide.price || product.price || 'Shop now',
       href: slide.href || `product.html?item=${product.slug}`,
       theme: slide.theme || getProductTheme(product),
-      themeColor: slide.themeColor || (slide.theme === 'clay' ? '#d7c4b0' : '#cdeaa4'),
+      themeColor: slide.themeColor || slide.themecolor || (slide.theme === 'clay' ? '#d7c4b0' : '#cdeaa4'),
       productSlug: product.slug
     };
   }
-  function renderHeroSlides(){
-    const slides = getHeroSlides().map(resolveHeroSlide);
+  async function renderHeroSlides(){
+    const slides = await Promise.all((await getHeroSlides()).map(resolveHeroSlide));
     const scroll = document.getElementById('heroScroll');
     const dots = document.getElementById('heroDots');
     if (!scroll || !dots) return;
@@ -587,8 +620,8 @@
     }).join('');
     dots.innerHTML = slides.map((_, index) => `<span class="${index === 0 ? 'active' : ''}"></span>`).join('');
   }
-  function renderPromoStrip(){
-    const active = getDiscounts()[0];
+  async function renderPromoStrip(){
+    const active = (await getDiscounts())[0];
     const title = document.getElementById('promoTitle');
     const meta = document.getElementById('promoMeta');
     const cta = document.getElementById('promoCta');
@@ -604,10 +637,24 @@
     meta.textContent = `Use code ${active.code} at checkout · Limited time offer`;
     cta.textContent = 'Shop now';
   }
-  function getInventoryCatalog(){
+  async function getInventoryCatalog(){
+    const categoryRows = await fetchSupabaseTable('categories', []);
+    const categoryLookup = {};
+    categoryRows.forEach(category => {
+      if (!category || !category.id) return;
+      categoryLookup[String(category.id)] = category.name || category.slug || 'Skincare';
+      if (category.slug) categoryLookup[String(category.slug)] = category.name || category.slug;
+    });
+    const supabaseCatalog = await fetchSupabaseTable('products', []);
+    if (supabaseCatalog.length) {
+      const normalized = supabaseCatalog.map(item => normalizeProduct(item, categoryLookup));
+      try { window.sessionStorage.setItem(INVENTORY_KEY, JSON.stringify(normalized)); } catch {}
+      return normalized;
+    }
     try {
-      const saved = JSON.parse(localStorage.getItem(INVENTORY_KEY)) || [];
-      return Array.isArray(saved) ? saved : [];
+      const storage = window.sessionStorage || window.localStorage;
+      const saved = JSON.parse(storage.getItem(INVENTORY_KEY)) || [];
+      return Array.isArray(saved) ? saved.map(item => normalizeProduct(item, categoryLookup)) : [];
     } catch {
       return [];
     }
@@ -637,24 +684,107 @@
     const cartQty = getCart().find(entry => entry.slug === slug)?.qty || 0;
     return Math.max(0, currentStock - held - cartQty);
   }
-  function normalizeProduct(item){
-    const status = item.status || (Number(item.stock) <= 0 ? 'Out of stock' : 'Active');
+  function normalizeCategoryName(value){
+    return String(value || '').trim();
+  }
+  function categoryMatches(a, b){
+    return normalizeCategoryName(a).toLowerCase() === normalizeCategoryName(b).toLowerCase();
+  }
+  function getCategoryNamesFromCatalog(items = []){
+    const names = new Set();
+    items.forEach(item => {
+      const name = normalizeCategoryName(item && item.cat);
+      if (name) names.add(name);
+    });
+    return Array.from(names);
+  }
+  async function renderCategoryPills(){
+    const container = document.getElementById('categoryPills');
+    if (!container) return;
+    const categoryRows = await fetchSupabaseTable('categories', []);
+    const dbNames = categoryRows
+      .map(category => normalizeCategoryName(category && (category.name || category.slug)))
+      .filter(Boolean);
+    const catalogNames = getCategoryNamesFromCatalog(catalog);
+    const names = [...new Set([...dbNames, ...catalogNames])];
+    const pills = ['<button class="cat-pill active" data-cat="All">All</button>'];
+    names.forEach(name => {
+      pills.push(`<button class="cat-pill" data-cat="${name}">${name}</button>`);
+    });
+    if (!names.length) {
+      container.innerHTML = '<button class="cat-pill active" data-cat="All">All</button>';
+      return;
+    }
+    container.innerHTML = pills.join('');
+
+    container.querySelectorAll('.cat-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        container.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+
+        const cat = pill.dataset.cat;
+        if (cat === 'All') {
+          if (categoryResults) categoryResults.style.display = 'none';
+          return;
+        }
+        if (categoryResultsTitle) categoryResultsTitle.textContent = cat;
+        const matches = catalog.filter(p => categoryMatches(p.cat, cat));
+        const items = matches.length
+          ? matches.map(cardHTML).join('')
+          : `<p style="padding:20px 4px; color:var(--muted); font-size:13.5px;">No products in ${cat} yet — check back soon.</p>`;
+        if (catMobileTarget) catMobileTarget.innerHTML = items;
+        if (catDesktopTarget) catDesktopTarget.innerHTML = items;
+        if (categoryResults) categoryResults.style.display = 'block';
+      });
+    });
+  }
+  function normalizeProduct(item, categoryLookup = {}){
+    const stock = Number(item.stock || 0);
+    const rawStatus = String(item.status || '').trim().toLowerCase();
+    const status = rawStatus === 'hidden' ? 'Hidden'
+      : rawStatus === 'out_of_stock' || rawStatus === 'out of stock' ? 'Out of stock'
+      : rawStatus === 'low_stock' || rawStatus === 'low stock' ? 'Low stock'
+      : stock <= 0 ? 'Out of stock' : 'Active';
+    const categoryName = item.cat || item.category_name || item.category || categoryLookup[String(item.category_id)] || categoryLookup[String(item.categoryId)] || 'Skincare';
+    const numericPrice = Number(item.price || 0);
     return {
       ...item,
-      stock: Number(item.stock || 0),
+      stock,
       brand:item.brand || 'Oriflame LK',
       name:item.name || 'Product',
-      cat:item.cat || 'Skincare',
-      price:item.price || 'Rs. 0',
-      image:item.image || 'productImage.webp',
-      tag:status === 'Out of stock' ? 'OUT OF STOCK' : status === 'Low stock' ? 'LOW STOCK' : item.tag || null,
+      cat: categoryName,
+      price: Number.isFinite(numericPrice) && numericPrice >= 0 ? `Rs. ${numericPrice.toLocaleString('en-US')}` : (item.price || 'Rs. 0'),
+      image:item.image || item.image_url || 'productImage.webp',
+      desc:item.description || item.desc || `${item.name || 'Product'} is now available from the ${categoryName} collection.`,
+      tag: status === 'Out of stock' ? 'OUT OF STOCK' : status === 'Low stock' ? 'LOW STOCK' : item.tag || null,
       status
     };
   }
-  const catalog = getInventoryCatalog().map(normalizeProduct).filter(item => item.status !== 'Hidden');
-  const products = catalog.filter(item => item.status !== 'Out of stock').slice(0, 8);
-  renderHeroSlides();
-  renderPromoStrip();
+  let catalog = [];
+  let products = [];
+  const categoryResults = document.getElementById('categoryResults');
+  const categoryResultsTitle = document.getElementById('categoryResultsTitle');
+  const catMobileTarget = document.getElementById('catProdScrollMobile');
+  const catDesktopTarget = document.getElementById('catProdGridDesktop');
+
+  async function bootStorefront(){
+    catalog = (await getInventoryCatalog()).map(normalizeProduct).filter(item => item.status !== 'Hidden');
+    products = catalog.filter(item => item.status !== 'Out of stock').slice(0, 8);
+    await renderHeroSlides();
+    await renderPromoStrip();
+    await renderCategoryPills();
+
+    const mobileTarget = document.getElementById('prodScrollMobile');
+    const desktopTarget = document.getElementById('prodGridDesktop');
+    const html = products.length
+      ? products.map(cardHTML).join('')
+      : `<p style="padding:20px 4px; color:var(--muted); font-size:13.5px;">No products are available right now.</p>`;
+    if (mobileTarget) mobileTarget.innerHTML = html;
+    if (desktopTarget) desktopTarget.innerHTML = html;
+    renderSearchResults();
+  }
+
+  bootStorefront();
 
   function cardHTML(p, idx){
    const availableStock = getAvailableStock(p.slug);
@@ -720,28 +850,30 @@
    resultsEl.innerHTML = matches.map(searchResultHTML).join('');
   }
 
-  const mobileTarget = document.getElementById('prodScrollMobile');
-  const desktopTarget = document.getElementById('prodGridDesktop');
-  const html = products.length
-    ? products.map(cardHTML).join('')
-    : `<p style="padding:20px 4px; color:var(--muted); font-size:13.5px;">No products are available right now.</p>`;
-  mobileTarget.innerHTML = html;
-  desktopTarget.innerHTML = html;
-
   const CART_KEY = 'oriflameCart';
-  const bagEls = [document.getElementById('mobileBagCount')];
+  const bagEls = [
+    document.getElementById('mobileBagCount'),
+    document.getElementById('desktopBagCount')
+  ].filter(Boolean);
   function getCart(){
     try { return JSON.parse(localStorage.getItem(CART_KEY)) || []; }
     catch { return []; }
   }
-  function saveCart(cart){ localStorage.setItem(CART_KEY, JSON.stringify(cart)); }
+  function saveCart(cart){
+    localStorage.setItem(CART_KEY, JSON.stringify(cart));
+    window.dispatchEvent(new CustomEvent('oriflame:cart-updated'));
+  }
   function cartCount(){ return getCart().reduce((sum, item) => sum + item.qty, 0); }
   function updateBag(){ bagEls.forEach(el => el && (el.textContent = cartCount())); }
   function animateAddToCart(button){
     const card = button.closest('.card');
     const img = card && card.querySelector('.card-img');
-    const target = document.getElementById('mobileBagBtn');
-    const badge = document.getElementById('mobileBagCount');
+    const target = window.innerWidth >= 900
+      ? document.getElementById('desktopBagBtn')
+      : document.getElementById('mobileBagBtn');
+    const badge = window.innerWidth >= 900
+      ? document.getElementById('desktopBagCount')
+      : document.getElementById('mobileBagCount');
     if (!img || !target) return;
     const from = img.getBoundingClientRect();
     const to = target.getBoundingClientRect();
@@ -825,32 +957,6 @@
   /* ---------- Category filtering ----------
      Selecting a category filters the real catalog down to items that
      belong to it, instead of showing empty "coming soon" placeholders. */
-  const categoryResults = document.getElementById('categoryResults');
-  const categoryResultsTitle = document.getElementById('categoryResultsTitle');
-  const catMobileTarget = document.getElementById('catProdScrollMobile');
-  const catDesktopTarget = document.getElementById('catProdGridDesktop');
-
-  document.querySelectorAll('.cat-pill').forEach(pill => {
-    pill.addEventListener('click', () => {
-      document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
-      pill.classList.add('active');
-
-      const cat = pill.dataset.cat;
-      if (cat === 'All') {
-        categoryResults.style.display = 'none';
-        return;
-      }
-      categoryResultsTitle.textContent = cat;
-      const matches = catalog.filter(p => p.cat === cat);
-      const items = matches.length
-        ? matches.map(cardHTML).join('')
-        : `<p style="padding:20px 4px; color:var(--muted); font-size:13.5px;">No products in ${cat} yet — check back soon.</p>`;
-      catMobileTarget.innerHTML = items;
-      catDesktopTarget.innerHTML = items;
-      categoryResults.style.display = 'block';
-    });
-  });
-
   document.querySelectorAll('[data-nav-cat]').forEach(link => {
     link.addEventListener('click', (event) => {
       const cat = link.dataset.navCat;
@@ -892,8 +998,6 @@
       if (event.key === 'Escape') closeSearch();
     });
   }
-  renderSearchResults();
-
   document.querySelector('.promo-cta').addEventListener('click', () => {
     document.getElementById('new-arrivals').scrollIntoView({ behavior: 'smooth' });
   });
@@ -911,12 +1015,14 @@
   const IDLE_RESUME_MS = 5000;
 
   function goToHeroSlide(i){
+    if (!heroScroll || !heroCards || !heroCards.length) return;
     heroIndex = (i + heroCards.length) % heroCards.length;
     const target = heroCards[heroIndex];
-    // scroll the carousel itself (not the page) to this card's position
+    if (!target) return;
     heroScroll.scrollTo({ left: target.offsetLeft - heroScroll.offsetLeft, behavior: 'smooth' });
   }
   function startAutoplay(){
+    if (!heroScroll || !heroCards || !heroCards.length) return;
     stopAutoplay();
     autoplayTimer = setInterval(() => goToHeroSlide(heroIndex + 1), AUTOPLAY_MS);
   }
@@ -931,20 +1037,23 @@
     idleTimer = setTimeout(startAutoplay, IDLE_RESUME_MS);
   }
 
-  heroScroll.addEventListener('scroll', () => {
-    const idx = Math.round(heroScroll.scrollLeft / heroScroll.clientWidth);
-    heroIndex = idx;
-    dots.forEach((d,i) => d.classList.toggle('active', i === idx));
-    // NOTE: intentionally not calling onUserInteracted() here — this
-    // fires for our own autoplay-triggered scrolls too, and treating
-    // those as "user interaction" would cancel autoplay every time it
-    // moves the carousel itself. Only real gestures below count.
-  });
-  ['touchstart','pointerdown','wheel'].forEach(evt =>
-    heroScroll.addEventListener(evt, onUserInteracted, {passive:true})
-  );
+  if (heroScroll && heroCards && heroCards.length) {
+    heroScroll.addEventListener('scroll', () => {
+      const idx = Math.round(heroScroll.scrollLeft / heroScroll.clientWidth);
+      heroIndex = idx;
+      dots.forEach((d,i) => d.classList.toggle('active', i === idx));
+      // NOTE: intentionally not calling onUserInteracted() here — this
+      // fires for our own autoplay-triggered scrolls too, and treating
+      // those as "user interaction" would cancel autoplay every time it
+      // moves the carousel itself. Only real gestures below count.
+    });
+    ['touchstart','pointerdown','wheel'].forEach(evt =>
+      heroScroll.addEventListener(evt, onUserInteracted, {passive:true})
+    );
 
-  startAutoplay();
+    startAutoplay();
+  }
 </script>
+  <script src="site-header.js"></script>
 </body>
 </html>

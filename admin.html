@@ -87,9 +87,11 @@
     display:flex; align-items:flex-start; justify-content:space-between; gap:16px;
     margin-bottom:18px; padding:8px 4px 0;
   }
+  .admin-identity{display:grid; gap:4px; text-align:right;}
   .eyebrow{font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.12em;}
   h1{font-size:28px; line-height:1.08; letter-spacing:-.04em; margin-top:4px;}
   .today{font-size:12.5px; color:var(--muted); font-weight:700; text-align:right;}
+  .welcome-name{font-size:13px; color:var(--ink); font-weight:800; letter-spacing:-.02em;}
   .metrics{display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:16px;}
   .metric{
     background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
@@ -139,8 +141,32 @@
   .input:focus,.select:focus,.textarea:focus{border-color:var(--green); box-shadow:0 0 0 3px var(--green-soft);}
   .filters{display:grid; gap:10px; padding:14px; border-bottom:1px solid var(--line); background:var(--soft);}
   .grid-form{display:grid; gap:10px; padding:14px; border-bottom:1px solid var(--line); background:var(--soft);}
-  .field{display:grid; gap:6px;}
-  .field label{font-size:11px; font-weight:800; color:#48534b; text-transform:uppercase;}
+  .inventory-toolbar{padding:14px; border-bottom:1px solid var(--line); background:var(--soft);} 
+  .inventory-filter-bar{display:grid; grid-template-columns:minmax(0,2fr) minmax(170px,220px) auto; gap:10px; align-items:end;} 
+  .field{display:grid; gap:6px;} 
+  .field.compact{gap:6px;} 
+  .field label{font-size:11px; font-weight:800; color:#48534b; text-transform:uppercase;} 
+  .inventory-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,200px)); gap:12px; padding:14px; justify-content:flex-start;} 
+  .inventory-card{display:flex; flex-direction:column; gap:10px; padding:12px; border:1px solid var(--line); border-radius:18px; background:#f7f8f4; box-shadow:0 8px 22px rgba(17,23,18,.03); position:relative; width:100%; max-width:200px;} 
+  .inventory-card-media{height:120px; border-radius:14px; overflow:hidden; background:#edf2eb; border:1px solid var(--line);} 
+  .inventory-card-media img{width:100%; height:100%; object-fit:contain; object-position:center; background:#fff;} 
+  .inventory-card-top{display:flex; align-items:center; justify-content:space-between; gap:8px;} 
+  .inventory-tag{display:inline-flex; align-items:center; justify-content:center; min-height:24px; border-radius:999px; padding:4px 8px; background:var(--black); color:#fff; font-size:9.5px; font-weight:800; text-transform:uppercase; letter-spacing:.08em;} 
+  .inventory-status{display:inline-flex; align-items:center; border-radius:999px; padding:4px 8px; font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.08em;} 
+  .inventory-status.active{background:var(--green-soft); color:#23471d;} 
+  .inventory-status.low{background:var(--amber-soft); color:#83560d;} 
+  .inventory-status.out{background:var(--red-soft); color:#7f1e1e;} 
+  .inventory-name{font-size:14px; font-weight:800; letter-spacing:-.025em; line-height:1.3; min-height:38px;} 
+  .inventory-brand{font-size:11px; color:var(--muted); font-weight:700;} 
+  .inventory-meta{font-size:11px; color:var(--muted); margin-top:4px; line-height:1.5;} 
+  .inventory-actions{display:grid; gap:8px; margin-top:auto;} 
+  .inventory-qty-row{display:grid; grid-template-columns:1fr auto; gap:8px;} 
+  .inventory-qty-row .input{min-height:34px; padding:7px 9px; font-size:12px;} 
+  .inventory-actions-inline{display:flex; gap:8px; flex-wrap:wrap;} 
+  .inventory-actions-inline .btn{flex:1 1 96px; min-height:34px; padding:0 10px; font-size:11px;} 
+  .product-modal{position:fixed; inset:0; background:rgba(17,23,18,.52); display:none; align-items:center; justify-content:center; padding:20px; z-index:60;} 
+  .product-modal.show{display:flex;} 
+  .product-modal .phone-order-dialog{width:min(820px,100%); max-height:86vh; overflow:auto;} 
   .hero-preview-wrap{padding:14px; border-top:1px solid var(--line); background:#f8faf7;}
   .hero-preview-card{position:relative; min-height:200px; border-radius:22px; padding:20px 18px; overflow:hidden; display:flex; flex-direction:column; justify-content:space-between; box-shadow:inset 0 0 0 1px rgba(15,23,42,.04);}
   .hero-preview-card .hero-preview-image{position:absolute; right:16px; top:50%; width:38%; height:62%; transform:translateY(-50%); object-fit:contain; object-position:center; border-radius:14px; opacity:.96;}
@@ -224,13 +250,17 @@
   <form class="lock-card" id="adminLockForm">
     <div class="eyebrow">Authorized access</div>
     <h1>Operations login</h1>
-    <p>Enter the admin PIN to manage orders, payments and inventory.</p>
+    <p>Sign in with your admin account to manage orders, payments and inventory.</p>
     <div class="field">
-      <label for="adminPin">Staff PIN</label>
-      <input class="input" id="adminPin" type="password" inputmode="numeric" autocomplete="current-password" required>
+      <label for="adminEmail">Email</label>
+      <input class="input" id="adminEmail" type="email" autocomplete="email" required>
     </div>
-    <button class="btn primary" type="submit" style="width:100%; margin-top:14px;">Unlock board</button>
-    <div class="lock-error" id="adminLockError">Incorrect PIN. Please try again.</div>
+    <div class="field" style="margin-top:10px;">
+      <label for="adminPassword">Password</label>
+      <input class="input" id="adminPassword" type="password" autocomplete="current-password" required>
+    </div>
+    <button class="btn primary" type="submit" style="width:100%; margin-top:14px;">Login</button>
+    <div class="lock-error" id="adminLockError">Incorrect email or password. Please try again.</div>
   </form>
 </div>
 <div class="app">
@@ -332,7 +362,10 @@
       <div>
         <h1>Operations command board</h1>
       </div>
-      <div class="today" id="todayText"></div>
+      <div class="admin-identity">
+        <div class="welcome-name" id="welcomeName">Welcome</div>
+        <div class="today" id="todayText"></div>
+      </div>
     </header>
 
     <section class="view active" id="marketingView">
@@ -445,27 +478,6 @@
           <div class="queue" id="discountList"></div>
         </div>
 
-        <div class="panel">
-          <div class="panel-head">
-            <div>
-              <div class="panel-title">Category directory</div>
-              <div class="panel-sub">Manage the categories users can browse from the homepage and category page.</div>
-            </div>
-          </div>
-          <form class="grid-form" id="categoryForm">
-            <input type="hidden" id="categoryEditId">
-            <div class="field wide">
-              <label for="categoryName">Category name</label>
-              <input class="input" id="categoryName" required placeholder="Skincare">
-            </div>
-            <div class="field wide">
-              <label for="categoryDescription">Description</label>
-              <textarea class="textarea" id="categoryDescription" placeholder="Short category intro text"></textarea>
-            </div>
-            <button class="btn primary" type="submit" id="saveCategoryBtn">Save category</button>
-          </form>
-          <div class="queue" id="categoryList"></div>
-        </div>
       </div>
     </section>
 
@@ -476,9 +488,27 @@
             <div class="panel-title">Inventory control</div>
             <div class="panel-sub">Add, edit, remove, adjust stock and mark availability.</div>
           </div>
-          <button class="btn" id="resetInventoryBtn" type="button">Clear inventory</button>
+          <div class="toolbar">
+            <button class="btn primary" id="newProductBtn" type="button">Add product</button>
+            <button class="btn" id="resetInventoryBtn" type="button">Clear inventory</button>
+          </div>
         </div>
-        <form class="grid-form" id="productForm">
+        <div class="inventory-toolbar">
+          <div class="inventory-filter-bar">
+            <div class="field compact">
+              <label for="inventorySearch">Search</label>
+              <input class="input" id="inventorySearch" placeholder="Search products">
+            </div>
+            <div class="field compact">
+              <label for="inventoryCategoryFilter">Type</label>
+              <select class="select" id="inventoryCategoryFilter">
+                <option value="all">All types</option>
+              </select>
+            </div>
+            <button class="btn primary" id="quickAddProductBtn" type="button">Quick add</button>
+          </div>
+        </div>
+        <form class="grid-form" id="productForm" style="display:none;">
           <input type="hidden" id="editSlug">
           <div class="field wide">
             <label for="pName">Product</label>
@@ -515,9 +545,121 @@
           </div>
           <button class="btn primary" id="saveProductBtn" type="submit">Save item</button>
         </form>
-        <div class="queue" id="inventoryList"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Added products</div>
+            <div class="panel-sub">Products already added to the catalog.</div>
+          </div>
+        </div>
+        <div class="inventory-grid" id="inventoryList"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Add category</div>
+            <div class="panel-sub">Add a new category to the catalog.</div>
+          </div>
+          <button class="btn primary" id="newCategoryBtn" type="button">Add category</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Added categories</div>
+            <div class="panel-sub">Categories already added to the catalog.</div>
+          </div>
+        </div>
+        <div class="queue" id="categoryList"></div>
       </div>
     </section>
+
+    <div class="product-modal" id="productModal" aria-hidden="true">
+      <div class="phone-order-dialog">
+        <div class="phone-order-header">
+          <h2 id="productModalTitle">Add product</h2>
+          <button class="btn" type="button" id="closeProductModalBtn">Close</button>
+        </div>
+        <form class="phone-order-form" id="inventoryProductModalForm">
+          <input type="hidden" id="inventoryEditSlug">
+          <div class="two-col">
+            <div class="field-row">
+              <label for="inventoryProductName">Product name</label>
+              <input class="input" id="inventoryProductName" required>
+            </div>
+            <div class="field-row">
+              <label for="inventoryBrand">Brand</label>
+              <input class="input" id="inventoryBrand" required>
+            </div>
+          </div>
+          <div class="two-col">
+            <div class="field-row">
+              <label for="inventoryCategory">Category</label>
+              <select class="select" id="inventoryCategory"></select>
+            </div>
+            <div class="field-row">
+              <label for="inventoryStatus">Status</label>
+              <select class="select" id="inventoryStatus">
+                <option>Active</option>
+                <option>Low stock</option>
+                <option>Out of stock</option>
+                <option>Hidden</option>
+              </select>
+            </div>
+          </div>
+          <div class="two-col">
+            <div class="field-row">
+              <label for="inventoryPrice">Price</label>
+              <input class="input" id="inventoryPrice" required placeholder="Rs. 1,999">
+            </div>
+            <div class="field-row">
+              <label for="inventoryStock">Stock</label>
+              <input class="input" id="inventoryStock" required type="number" min="0" value="10">
+            </div>
+          </div>
+          <div class="field-row">
+            <label for="inventoryImage">Image URL</label>
+            <input class="input" id="inventoryImage" required placeholder="productImage.webp">
+          </div>
+          <div class="field-row">
+            <label for="inventoryImages">Additional images</label>
+            <textarea class="textarea" id="inventoryImages" placeholder="One image URL per line"></textarea>
+          </div>
+          <div class="field-row">
+            <label for="inventoryOptions">Product options</label>
+            <textarea class="textarea" id="inventoryOptions" placeholder="Color: Rose | Nude&#10;Size: 30ml | 50ml"></textarea>
+          </div>
+          <div class="phone-order-actions">
+            <button class="btn" type="button" id="cancelProductModalBtn">Cancel</button>
+            <button class="btn primary" id="saveProductModalBtn" type="submit">Save item</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="product-modal" id="categoryModal" aria-hidden="true">
+      <div class="phone-order-dialog">
+        <div class="phone-order-header">
+          <h2 id="categoryModalTitle">Add category</h2>
+          <button class="btn" type="button" id="closeCategoryModalBtn">Close</button>
+        </div>
+        <form class="phone-order-form" id="categoryForm">
+          <input type="hidden" id="categoryEditId">
+          <div class="field-row">
+            <label for="categoryName">Category name</label>
+            <input class="input" id="categoryName" required placeholder="Skincare">
+          </div>
+          <div class="field-row">
+            <label for="categoryDescription">Description</label>
+            <textarea class="textarea" id="categoryDescription" placeholder="Short category intro text"></textarea>
+          </div>
+          <div class="phone-order-actions">
+            <button class="btn" type="button" id="cancelCategoryModalBtn">Cancel</button>
+            <button class="btn primary" type="submit" id="saveCategoryBtn">Save category</button>
+          </div>
+        </form>
+      </div>
+    </div>
 
     <section class="view" id="marketingView">
       <div class="marketing-grid">
@@ -629,27 +771,6 @@
           <div class="queue" id="discountList"></div>
         </div>
 
-        <div class="panel">
-          <div class="panel-head">
-            <div>
-              <div class="panel-title">Category directory</div>
-              <div class="panel-sub">Manage the categories users can browse from the homepage and category page.</div>
-            </div>
-          </div>
-          <form class="grid-form" id="categoryForm">
-            <input type="hidden" id="categoryEditId">
-            <div class="field wide">
-              <label for="categoryName">Category name</label>
-              <input class="input" id="categoryName" required placeholder="Skincare">
-            </div>
-            <div class="field wide">
-              <label for="categoryDescription">Description</label>
-              <textarea class="textarea" id="categoryDescription" placeholder="Short category intro text"></textarea>
-            </div>
-            <button class="btn primary" type="submit" id="saveCategoryBtn">Save category</button>
-          </form>
-          <div class="queue" id="categoryList"></div>
-        </div>
       </div>
     </section>
 
@@ -657,8 +778,9 @@
 </div>
 
 <script>
-  const ADMIN_PIN = '2510';
   const ADMIN_SESSION_KEY = 'oriflameAdminUnlocked';
+  const ADMIN_AUTH_SESSION_KEY = 'oriflameAdminAuthSession';
+  const ADMIN_EMAILS = [];
   const ORDER_KEY = 'oriflameOrders';
   const INVENTORY_KEY = 'oriflameInventory';
   const INVENTORY_VERSION_KEY = 'oriflameInventoryVersion';
@@ -673,6 +795,8 @@
   const defaultHeroSlides = [];
   const defaultDiscounts = [];
   const defaultBills = [];
+  const SUPABASE_URL = 'https://nhehzncyhcditfrrcnag.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_7ukY5lsqHvHiofPtiXg9_Q_gYjNKmZL';
   const LEGACY_DEFAULT_CATEGORY_IDS = ['skincare', 'makeup', 'fragrance', 'hair', 'bath-body'];
   const LEGACY_DEFAULT_HERO_IDS = ['hero-infinita', 'hero-glow', 'hero-summer'];
   const LEGACY_DEFAULT_DISCOUNT_CODES = ['ORIFLAME15', 'BUNDLE20'];
@@ -681,25 +805,238 @@
   ];
   const emptyInventory = [];
 
+  const SESSION_PERSISTED_KEYS = new Set([INVENTORY_KEY, CATEGORIES_KEY, HERO_KEY, DISCOUNT_KEY, BILL_KEY, ORDER_KEY]);
+  function resolveStorage(key){
+    try {
+      if (SESSION_PERSISTED_KEYS.has(key) && window.sessionStorage) {
+        return window.sessionStorage;
+      }
+    } catch {}
+    return window.localStorage;
+  }
   function read(key, fallback){
-    try { return JSON.parse(localStorage.getItem(key)) || fallback; }
+    try {
+      const raw = resolveStorage(key).getItem(key);
+      return raw === null ? fallback : JSON.parse(raw) || fallback;
+    }
     catch { return fallback; }
   }
-  function write(key, value){ localStorage.setItem(key, JSON.stringify(value)); }
+  function write(key, value){
+    try { resolveStorage(key).setItem(key, JSON.stringify(value)); }
+    catch {}
+  }
   async function apiRequest(path, options = {}){
+    const {throwOnError = false, ...requestOptions} = options;
     try {
+      await ensureFreshAdminSession();
       const response = await fetch(path, {
-        headers: {'Content-Type': 'application/json'},
-        ...options
+        headers: {
+          ...supabaseHeaders(),
+          'Content-Type': 'application/json'
+        },
+        ...requestOptions
       });
-      if (!response.ok) throw new Error(`Request failed: ${response.status}`);
-      return await response.json();
+      const responseText = await response.text();
+      let data = null;
+      try { data = responseText ? JSON.parse(responseText) : null; } catch {}
+      if (!response.ok) {
+        throw new Error(data?.message || data?.error || responseText || `Request failed: ${response.status}`);
+      }
+      return data;
     } catch (error) {
       console.warn('API fallback activated:', error.message);
+      if (throwOnError) throw error;
       return null;
     }
   }
+  function supabaseHeaders(extra = {}){
+    const session = typeof loadAdminAuthSession === 'function' ? loadAdminAuthSession() : null;
+    const token = (session && session.access_token) || SUPABASE_KEY;
+    return {
+      apikey: SUPABASE_KEY,
+      Authorization: 'Bearer ' + token,
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      ...extra
+    };
+  }
+  function tokenExpiry(token){
+    try {
+      const payload = JSON.parse(atob(String(token).split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+      return Number(payload.exp || 0);
+    } catch {
+      return 0;
+    }
+  }
+  let refreshPromise = null;
+  async function ensureFreshAdminSession(){
+    const session = loadAdminAuthSession();
+    if (!session?.refresh_token || !session.access_token) return session;
+    const expiresAt = tokenExpiry(session.access_token);
+    if (expiresAt > Math.floor(Date.now() / 1000) + 60) return session;
+    if (!refreshPromise) {
+      refreshPromise = fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+        method: 'POST',
+        headers: {
+          apikey: SUPABASE_KEY,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ refresh_token: session.refresh_token })
+      }).then(async response => {
+        const text = await response.text();
+        const data = text ? JSON.parse(text) : {};
+        if (!response.ok || !data.access_token) {
+          throw new Error(data.error_description || data.message || 'Admin session expired. Please log in again.');
+        }
+        const refreshed = {
+          ...session,
+          access_token: data.access_token,
+          refresh_token: data.refresh_token || session.refresh_token,
+          expires_in: data.expires_in,
+          expires_at: data.expires_at
+        };
+        persistAdminAuthSession(refreshed);
+        return refreshed;
+      }).catch(error => {
+        persistAdminAuthSession(null);
+        lockAdmin();
+        throw error;
+      }).finally(() => {
+        refreshPromise = null;
+      });
+    }
+    return refreshPromise;
+  }
+  async function supabaseRequest(path, options = {}){
+    if (!SUPABASE_URL || !SUPABASE_KEY || SUPABASE_URL.includes('YOUR-PROJECT')) {
+      return null;
+    }
+    try {
+      await ensureFreshAdminSession();
+      const response = await fetch(`${SUPABASE_URL}${path}`, {
+        headers: supabaseHeaders(),
+        ...options,
+        headers: {
+          ...supabaseHeaders(),
+          ...(options.headers || {})
+        }
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || `Request failed: ${response.status}`);
+      }
+      const text = await response.text();
+      return text ? JSON.parse(text) : null;
+    } catch (error) {
+      console.warn('Supabase request failed:', error.message);
+      return null;
+    }
+  }
+  function normalizeSupabaseCategory(row){
+    const name = String(row.name || 'Category').trim();
+    const id = row.id || generateUuid();
+    return {
+      ...row,
+      id,
+      slug: row.slug || slugify(name),
+      name,
+      description: row.description || ''
+    };
+  }
+  function normalizeSupabaseProduct(row){
+    const name = String(row.name || 'Product').trim();
+    const statusRaw = String(row.status || 'active').trim();
+    const status = /out of stock/i.test(statusRaw) ? 'Out of stock' : /low stock/i.test(statusRaw) ? 'Low stock' : 'Active';
+    const id = row.id || generateUuid();
+    return {
+      ...row,
+      id,
+      slug: row.slug || slugify(name),
+      name,
+      brand: row.brand || 'Oriflame LK',
+      cat: row.cat || (row.category_id ? 'Makeup' : 'Skincare'),
+      price: row.price || row.price_value || 'Rs. 0',
+      image: row.image || row.image_url || 'productImage.webp',
+      images: Array.isArray(row.images) ? row.images : (() => { try { return JSON.parse(row.images || '[]'); } catch { return []; } })(),
+      options: row.options && typeof row.options === 'object' ? row.options : (() => { try { return JSON.parse(row.options || '{}'); } catch { return {}; } })(),
+      description: row.description || '',
+      stock: Number(row.stock || 0),
+      status
+    };
+  }
+  function normalizeSupabaseHero(row){
+    return {
+      ...row,
+      id: row.id || generateUuid(),
+      productSlug: row.productSlug || row.productslug || '',
+      eyebrow: row.eyebrow || 'Oriflame',
+      title: row.title || 'Featured offer',
+      description: row.description || '',
+      image: row.image || 'productImage.webp',
+      theme: row.theme || 'custom',
+      themeColor: row.themeColor || row.themecolor || '#cdeaa4',
+      price: row.price || 'Rs. 1,999',
+      href: row.href || 'index.html'
+    };
+  }
+  function normalizeSupabaseDiscount(row){
+    return {
+      ...row,
+      id: row.id || generateUuid(),
+      code: String(row.code || '').toUpperCase(),
+      title: row.title || '',
+      type: row.type || 'percent',
+      value: Number(row.value || 0),
+      active: row.active !== false
+    };
+  }
+  function resolveSupabaseCategoryName(categoryId){
+    const categories = getCategories();
+    const match = categories.find(item => String(item.id || item.slug) === String(categoryId));
+    return match ? match.name : 'Skincare';
+  }
   async function syncFromServer(){
+    if (SUPABASE_URL && SUPABASE_KEY && !SUPABASE_URL.includes('YOUR-PROJECT')) {
+      const collectionChecks = [
+        ['products', '/rest/v1/products?select=*'],
+        ['categories', '/rest/v1/categories?select=*'],
+        ['hero_slides', '/rest/v1/hero_slides?select=*'],
+        ['discount_codes', '/rest/v1/discount_codes?select=*']
+      ];
+
+      const results = await Promise.allSettled(collectionChecks.map(async ([name, path]) => {
+        const rows = await supabaseRequest(path);
+        if (!Array.isArray(rows)) throw new Error(`${name} returned an invalid response`);
+        return { name, rows };
+      }));
+
+      const collectionMap = {};
+      results.forEach(result => {
+        if (result.status === 'fulfilled') {
+          collectionMap[result.value.name] = result.value.rows;
+        }
+      });
+
+      if (Array.isArray(collectionMap.products)) {
+        const mapped = collectionMap.products.map(product => {
+          const normalized = normalizeSupabaseProduct(product);
+          normalized.cat = normalized.cat === 'Skincare' && product.category_id ? resolveSupabaseCategoryName(product.category_id) : normalized.cat;
+          return normalized;
+        });
+        write(INVENTORY_KEY, mapped);
+      }
+      if (Array.isArray(collectionMap.categories)) {
+        write(CATEGORIES_KEY, collectionMap.categories.map(normalizeSupabaseCategory));
+      }
+      if (Array.isArray(collectionMap.hero_slides)) {
+        write(HERO_KEY, collectionMap.hero_slides.map(normalizeSupabaseHero));
+      }
+      if (Array.isArray(collectionMap.discount_codes)) {
+        write(DISCOUNT_KEY, collectionMap.discount_codes.map(normalizeSupabaseDiscount));
+      }
+      if (Object.keys(collectionMap).length) rerender();
+      return;
+    }
     const collections = [
       { key: INVENTORY_KEY, path: '/api/products' },
       { key: CATEGORIES_KEY, path: '/api/categories' },
@@ -717,21 +1054,142 @@
   }
   async function persistCollection(key, value, endpoint){
     const payload = Array.isArray(value) ? value : [value];
-    const response = await apiRequest(endpoint, {
+    if (SUPABASE_URL && SUPABASE_KEY && !SUPABASE_URL.includes('YOUR-PROJECT')) {
+      if (key === INVENTORY_KEY) {
+        await Promise.all(payload.map(async (item) => {
+          const productId = item.id || generateUuid();
+          const categoryMatch = getCategories().find(cat => cat.name === item.cat);
+          const categoryId = categoryMatch ? categoryMatch.id : null;
+          const payloadItem = {
+            id: productId,
+            name: item.name || 'Product',
+            brand: item.brand || '',
+            sku: item.sku || `SKU-${Date.now()}`,
+            category_id: categoryId,
+            price: item.price || 0,
+            description: item.description || item.desc || '',
+            image_url: item.image || item.image_url || '',
+            stock: Number(item.stock || 0),
+            status: (String(item.status || 'Active')).toLowerCase().replace(/\s+/g, '_')
+          };
+          const response = await apiRequest(item.id ? `/api/products/${encodeURIComponent(item.id)}` : '/api/products', {
+            method: item.id ? 'PUT' : 'POST',
+            body: JSON.stringify(payloadItem),
+            throwOnError: true
+          });
+          if (!response || response.success !== true) throw new Error('Product was not saved.');
+          return response;
+        }));
+        return;
+      }
+      if (key === CATEGORIES_KEY) {
+        await Promise.all(payload.map(async (item) => {
+          const categoryId = item.id && String(item.id).includes('-') ? item.id : generateUuid();
+          const payloadItem = {
+            id: categoryId,
+            name: item.name || 'Category',
+            slug: item.slug || slugify(item.name),
+            description: item.description || ''
+          };
+          if (item.id && String(item.id).includes('-')) {
+            return supabaseRequest(`/rest/v1/categories?id=eq.${encodeURIComponent(item.id)}`, {
+              method: 'PATCH',
+              body: JSON.stringify(payloadItem)
+            });
+          }
+          return supabaseRequest('/rest/v1/categories', {
+            method: 'POST',
+            body: JSON.stringify(payloadItem)
+          });
+        }));
+        return;
+      }
+      if (key === HERO_KEY) {
+        await Promise.all(payload.map(async (item) => {
+          const heroId = item.id || generateUuid();
+          const body = {
+            id: heroId,
+           productSlug: item.productSlug || item.productslug || '',
+            eyebrow: item.eyebrow || 'Oriflame',
+            title: item.title || 'Featured offer',
+            description: item.description || '',
+            image: item.image || 'productImage.webp',
+            theme: item.theme || 'custom',
+           themeColor: item.themeColor || item.themecolor || '#cdeaa4',
+            price: item.price || 'Rs. 1,999',
+            href: item.href || 'index.html'
+          };
+          const response = await apiRequest(item.id ? `/api/hero/${encodeURIComponent(item.id)}` : '/api/hero', {
+           method: item.id ? 'PUT' : 'POST',
+           body: JSON.stringify(body),
+           throwOnError: true
+          });
+          if (!response || response.success !== true) throw new Error('Hero slide was not saved.');
+          return response;
+        }));
+        return;
+      }
+      if (key === DISCOUNT_KEY) {
+        await Promise.all(payload.map(async (item) => {
+          const discountId = item.id || generateUuid();
+          const body = {
+            id: discountId,
+            code: String(item.code || '').toUpperCase(),
+            title: item.title || '',
+            type: item.type || 'percent',
+            value: Number(item.value || 0),
+            active: Boolean(item.active)
+          };
+          if (item.id && String(item.id).includes('-')) {
+            return supabaseRequest(`/rest/v1/discount_codes?id=eq.${encodeURIComponent(item.id)}`, {
+              method: 'PATCH',
+              body: JSON.stringify(body)
+            });
+          }
+          return supabaseRequest('/rest/v1/discount_codes', { method: 'POST', body: JSON.stringify(body) });
+        }));
+        return;
+      }
+    }
+    await apiRequest(endpoint, {
       method: 'POST',
       body: JSON.stringify(payload)
     });
-    if (response) {
-      localStorage.setItem(key, JSON.stringify(value));
-    }
   }
-  function slugify(text){ return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `item-${Date.now()}`; }
+  async function deletePersistedItem(key, id, endpoint){
+    if (!id) return;
+    if (SUPABASE_URL && SUPABASE_KEY && !SUPABASE_URL.includes('YOUR-PROJECT')) {
+      const tableMap = {
+        [INVENTORY_KEY]: 'products',
+        [CATEGORIES_KEY]: 'categories',
+        [HERO_KEY]: 'hero_slides',
+        [DISCOUNT_KEY]: 'discount_codes'
+      };
+      const table = tableMap[key];
+      if (table) {
+        await supabaseRequest(`/rest/v1/${table}?id=eq.${encodeURIComponent(id)}`, {method: 'DELETE'});
+      }
+      return;
+    }
+    await apiRequest(`${endpoint}/${encodeURIComponent(id)}`, {method: 'DELETE'});
+  }
+  function generateUuid(){
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+      return crypto.randomUUID();
+    }
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (character) => {
+      const random = Math.random() * 16 | 0;
+      const value = character === 'x' ? random : (random & 0x3 | 0x8);
+      return value.toString(16);
+    });
+  }
+  function slugify(text){ return String(text || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `item-${Date.now()}`; }
   function clearLegacyInventoryIfNeeded(){
     try {
-      const saved = JSON.parse(localStorage.getItem(INVENTORY_KEY) || '[]');
+      const saved = read(INVENTORY_KEY, []);
       if (Array.isArray(saved) && saved.some(item => LEGACY_DEMO_PRODUCT_SLUGS.includes(String(item.slug)))) {
         write(INVENTORY_KEY, emptyInventory);
-        localStorage.setItem(INVENTORY_VERSION_KEY, INVENTORY_VERSION);
+        write(INVENTORY_VERSION_KEY, INVENTORY_VERSION);
         return true;
       }
     } catch {}
@@ -753,14 +1211,17 @@
     });
   }
   function ensureDefaults(){
+    if (SUPABASE_URL && SUPABASE_KEY && !SUPABASE_URL.includes('YOUR-PROJECT')) {
+      return;
+    }
     clearLegacyInventoryIfNeeded();
     clearLegacyMarketingDefaults();
-    if (!localStorage.getItem(CATEGORIES_KEY)) write(CATEGORIES_KEY, defaultCategories);
-    if (!localStorage.getItem(HERO_KEY)) write(HERO_KEY, defaultHeroSlides);
-    if (!localStorage.getItem(DISCOUNT_KEY)) write(DISCOUNT_KEY, defaultDiscounts);
-    if (!localStorage.getItem(INVENTORY_KEY)) {
+    if (!read(CATEGORIES_KEY, null)) write(CATEGORIES_KEY, defaultCategories);
+    if (!read(HERO_KEY, null)) write(HERO_KEY, defaultHeroSlides);
+    if (!read(DISCOUNT_KEY, null)) write(DISCOUNT_KEY, defaultDiscounts);
+    if (!read(INVENTORY_KEY, null)) {
       write(INVENTORY_KEY, emptyInventory);
-      localStorage.setItem(INVENTORY_VERSION_KEY, INVENTORY_VERSION);
+      write(INVENTORY_VERSION_KEY, INVENTORY_VERSION);
     }
   }
   function getCategories(){
@@ -768,32 +1229,181 @@
     return Array.isArray(saved) ? saved : [];
   }
   function saveCategories(items){
-    write(CATEGORIES_KEY, items);
-    persistCollection(CATEGORIES_KEY, items, '/api/collections/categories');
+    const next = Array.isArray(items) ? items : [];
+    if (SUPABASE_URL && SUPABASE_KEY && !SUPABASE_URL.includes('YOUR-PROJECT')) {
+      persistCollection(CATEGORIES_KEY, next, '/api/collections/categories');
+      syncFromServer();
+      return;
+    }
+    write(CATEGORIES_KEY, next);
+    persistCollection(CATEGORIES_KEY, next, '/api/collections/categories');
+    syncFromServer();
   }
   function getHeroSlides(){
     const saved = read(HERO_KEY, defaultHeroSlides);
     return Array.isArray(saved) ? saved : [];
   }
   function saveHeroSlides(items){
-    write(HERO_KEY, items);
-    persistCollection(HERO_KEY, items, '/api/collections/hero');
+    const next = Array.isArray(items) ? items : [];
+    if (SUPABASE_URL && SUPABASE_KEY && !SUPABASE_URL.includes('YOUR-PROJECT')) {
+      write(HERO_KEY, next);
+      return persistCollection(HERO_KEY, next, '/api/collections/hero')
+        .then(() => syncFromServer());
+    }
+    write(HERO_KEY, next);
+    return persistCollection(HERO_KEY, next, '/api/collections/hero');
   }
   function getDiscounts(){
     const saved = read(DISCOUNT_KEY, defaultDiscounts);
     return Array.isArray(saved) ? saved : [];
   }
   function saveDiscounts(items){
-    write(DISCOUNT_KEY, items);
-    persistCollection(DISCOUNT_KEY, items, '/api/collections/discounts');
+    const next = Array.isArray(items) ? items : [];
+    if (SUPABASE_URL && SUPABASE_KEY && !SUPABASE_URL.includes('YOUR-PROJECT')) {
+      persistCollection(DISCOUNT_KEY, next, '/api/collections/discounts');
+      syncFromServer();
+      return;
+    }
+    write(DISCOUNT_KEY, next);
+    persistCollection(DISCOUNT_KEY, next, '/api/collections/discounts');
+    syncFromServer();
+  }
+  function loadAdminAuthSession(){
+    try {
+      const raw = localStorage.getItem(ADMIN_AUTH_SESSION_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (error) {
+      return null;
+    }
+  }
+  function persistAdminAuthSession(session){
+    try {
+      if (session) localStorage.setItem(ADMIN_AUTH_SESSION_KEY, JSON.stringify(session));
+      else localStorage.removeItem(ADMIN_AUTH_SESSION_KEY);
+    } catch (error) {}
   }
   function unlockAdmin(){
     sessionStorage.setItem(ADMIN_SESSION_KEY, 'true');
+    updateUserGreeting(loadAdminAuthSession());
     document.body.classList.remove('admin-locked');
   }
-  if (sessionStorage.getItem(ADMIN_SESSION_KEY) === 'true') unlockAdmin();
+  function lockAdmin(){
+    sessionStorage.removeItem(ADMIN_SESSION_KEY);
+    const nameEl = document.getElementById('welcomeName');
+    if (nameEl) nameEl.textContent = 'Welcome';
+    document.body.classList.add('admin-locked');
+  }
+  function adminHeaders(extra = {}){
+    const token = (loadAdminAuthSession() && loadAdminAuthSession().access_token) || SUPABASE_KEY;
+    return {
+      apikey: SUPABASE_KEY,
+      Authorization: 'Bearer ' + token,
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      ...extra
+    };
+  }
+  async function loginWithSupabase(email, password){
+    const response = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+      method: 'POST',
+      headers: {
+        apikey: SUPABASE_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email, password })
+    });
+    const responseText = await response.text();
+    let data;
+    try {
+      data = responseText ? JSON.parse(responseText) : {};
+    } catch {
+      throw new Error(`Supabase returned an unexpected response (${response.status}). Check the project URL and publishable key.`);
+    }
+    if (!response.ok) {
+      throw new Error(data.error_description || data.msg || data.message || 'Invalid email or password.');
+    }
+    if (!data.access_token || !data.user) {
+      throw new Error('Supabase login did not return a valid session.');
+    }
+    const session = {
+      access_token: data.access_token,
+      refresh_token: data.refresh_token,
+      expires_in: data.expires_in,
+      expires_at: data.expires_at,
+      user: {
+        id: data.user.id,
+        email: data.user.email,
+        user_metadata: data.user.user_metadata || {},
+        app_metadata: data.user.app_metadata || {}
+      }
+    };
+    persistAdminAuthSession(session);
+    return session;
+  }
+  async function checkAdminAccess(session){
+    if (!session || !session.user || !session.user.id) return false;
+    try {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/user_roles?user_id=eq.${encodeURIComponent(session.user.id)}&select=role`, {
+        headers: adminHeaders()
+      });
+      if (response.status === 401) {
+        persistAdminAuthSession(null);
+        return false;
+      }
+      if (!response.ok) return false;
+      const rows = await response.json();
+      return Array.isArray(rows) && rows.some(item => ['admin', 'owner', 'superadmin'].includes(String(item.role || '').toLowerCase()));
+    } catch (error) {
+      return false;
+    }
+  }
+  async function bootstrapAdminSession(){
+    const session = loadAdminAuthSession();
+    if (!session) return;
+    const isAdmin = await checkAdminAccess(session);
+    if (isAdmin) {
+      unlockAdmin();
+      return;
+    }
+    persistAdminAuthSession(null);
+    lockAdmin();
+  }
+  if (sessionStorage.getItem(ADMIN_SESSION_KEY) === 'true') {
+    updateUserGreeting(loadAdminAuthSession());
+    unlockAdmin();
+  } else {
+    bootstrapAdminSession();
+  }
   ensureDefaults();
   syncFromServer();
+  if (SUPABASE_URL && SUPABASE_KEY && !SUPABASE_URL.includes('YOUR-PROJECT')) {
+    window.addEventListener('load', () => syncFromServer());
+  }
+  function titleCaseName(value){
+    const chunk = String(value || '').trim();
+    if (!chunk) return 'there';
+    const cleaned = chunk.replace(/[_\-.]+/g, ' ').replace(/\s+/g, ' ').trim();
+    if (!cleaned) return 'there';
+    return cleaned.split(' ').map(part => part ? part.charAt(0).toUpperCase() + part.slice(1).toLowerCase() : '').join(' ');
+  }
+  function getDisplayNameFromSession(session){
+    const metadata = session && session.user ? (session.user.user_metadata || session.user.metadata || session.user) : null;
+    const candidate = metadata && (metadata.full_name || metadata.name || metadata.first_name || metadata.last_name)
+      ? metadata.full_name || metadata.name || `${metadata.first_name || ''} ${metadata.last_name || ''}`.trim()
+      : (session && session.user && session.user.email) || '';
+    if (typeof candidate === 'string' && candidate.trim()) {
+      const emailCandidate = candidate.includes('@') ? candidate.split('@')[0] : candidate;
+      return titleCaseName(emailCandidate);
+    }
+    return 'there';
+  }
+  function updateUserGreeting(session){
+    const nameEl = document.getElementById('welcomeName');
+    const userSession = session || loadAdminAuthSession();
+    if (!nameEl) return;
+    const displayName = getDisplayNameFromSession(userSession);
+    nameEl.textContent = `Hello, ${displayName}`;
+  }
   function money(value){ return `Rs. ${Number(value || 0).toLocaleString('en-US')}`; }
   function hexToRgb(hex){
     const clean = hex.replace('#','');
@@ -853,30 +1463,45 @@
   }
   function getOrders(){ return read(ORDER_KEY, []).map(normalizeOrder); }
   function saveOrders(orders){
-    write(ORDER_KEY, orders);
+    if (SUPABASE_URL && SUPABASE_KEY && !SUPABASE_URL.includes('YOUR-PROJECT')) {
+      persistCollection(ORDER_KEY, orders, '/api/collections/orders');
+      syncFromServer();
+      return;
+    }
     persistCollection(ORDER_KEY, orders, '/api/collections/orders');
+    syncFromServer();
   }
   function getInventory(){
     const saved = read(INVENTORY_KEY, null);
     if (saved) {
       if (Array.isArray(saved) && saved.some(item => LEGACY_DEMO_PRODUCT_SLUGS.includes(String(item.slug)))) {
         write(INVENTORY_KEY, emptyInventory);
-        localStorage.setItem(INVENTORY_VERSION_KEY, INVENTORY_VERSION);
+        write(INVENTORY_VERSION_KEY, INVENTORY_VERSION);
         return [];
       }
-      if (localStorage.getItem(INVENTORY_VERSION_KEY) !== INVENTORY_VERSION) {
+      if (read(INVENTORY_VERSION_KEY, null) !== INVENTORY_VERSION) {
         write(INVENTORY_KEY, saved);
-        localStorage.setItem(INVENTORY_VERSION_KEY, INVENTORY_VERSION);
+        write(INVENTORY_VERSION_KEY, INVENTORY_VERSION);
       }
       return Array.isArray(saved) ? saved : [];
     }
     write(INVENTORY_KEY, emptyInventory);
-    localStorage.setItem(INVENTORY_VERSION_KEY, INVENTORY_VERSION);
+    write(INVENTORY_VERSION_KEY, INVENTORY_VERSION);
     return [];
   }
   function saveInventory(items){
-    write(INVENTORY_KEY, items);
-    persistCollection(INVENTORY_KEY, items, '/api/collections/inventory');
+    const next = Array.isArray(items) ? items : [];
+    if (SUPABASE_URL && SUPABASE_KEY && !SUPABASE_URL.includes('YOUR-PROJECT')) {
+      write(INVENTORY_KEY, next);
+      return persistCollection(INVENTORY_KEY, next, '/api/collections/inventory')
+        .then(() => syncFromServer())
+        .catch(error => {
+          alert(`Product could not be saved: ${error.message}`);
+          throw error;
+        });
+    }
+    write(INVENTORY_KEY, next);
+    return persistCollection(INVENTORY_KEY, next, '/api/collections/inventory');
   }
   function normalizeOrder(order){
     const payment = order.payment || {method:'whatsapp', label:'Decide on WhatsApp'};
@@ -938,6 +1563,17 @@
     if (catSelect) {
       const cats = getCategories().map(cat => cat.name);
       catSelect.innerHTML = cats.map(item => `<option>${item}</option>`).join('');
+    }
+    const inventoryCatSelect = document.getElementById('inventoryCategory');
+    if (inventoryCatSelect) {
+      const cats = getCategories().map(cat => cat.name);
+      inventoryCatSelect.innerHTML = cats.map(item => `<option value="${item}">${item}</option>`).join('');
+    }
+    const inventoryFilter = document.getElementById('inventoryCategoryFilter');
+    if (inventoryFilter) {
+      const categories = ['all', ...getCategories().map(cat => cat.name)];
+      inventoryFilter.innerHTML = categories.map(item => `<option value="${item === 'all' ? 'all' : item}">${item === 'all' ? 'All types' : item}</option>`).join('');
+      inventoryFilter.dataset.ready = 'true';
     }
     syncHeroProductOptions();
   }
@@ -1122,29 +1758,63 @@
   }
   function renderInventory(){
     const list = document.getElementById('inventoryList');
+    const search = document.getElementById('inventorySearch');
+    const filter = document.getElementById('inventoryCategoryFilter');
     const items = getInventory();
+    const activeFilter = filter ? filter.value : 'all';
+    const query = search ? search.value.trim().toLowerCase() : '';
+    const visibleItems = items.filter(item => {
+      const categoryMatch = activeFilter === 'all' || String(item.cat || '').toLowerCase() === activeFilter.toLowerCase();
+      const searchMatch = !query || [item.name, item.brand, item.cat, item.status].filter(Boolean).join(' ').toLowerCase().includes(query);
+      return categoryMatch && searchMatch;
+    });
     if (!items.length) {
       list.innerHTML = '<div class="empty">No inventory items yet.</div>';
       return;
     }
-    list.innerHTML = items.map(item => `
-      <article class="stock-row">
-        <img class="thumb" src="${item.image}" alt="${item.name}">
-        <div>
-          <div class="strong">${item.name}</div>
-          <div class="meta">${item.brand} - ${item.cat} - ${item.price}</div>
-          <div class="meta">Stock: ${item.stock} - Status: ${item.status}</div>
-        </div>
-        <div class="stock-tools">
-          <div class="qty-box">
-            <input class="input" data-stock-input="${item.slug}" type="number" min="0" value="${item.stock}">
-            <button class="btn" data-stock-save="${item.slug}" type="button">Update</button>
+    if (!filter || !filter.dataset.ready) {
+      const options = ['all', ...new Set(items.map(item => item.cat || 'General'))];
+      if (filter) {
+        filter.innerHTML = options.map(category => `<option value="${category === 'all' ? 'all' : category}">${category === 'all' ? 'All types' : category}</option>`).join('');
+        filter.dataset.ready = 'true';
+      }
+    }
+    if (filter && activeFilter !== 'all' && !Array.from(filter.options).some(option => option.value === activeFilter)) {
+      filter.value = 'all';
+    }
+    if (!visibleItems.length) {
+      list.innerHTML = '<div class="empty">No products match your current filter.</div>';
+      return;
+    }
+    list.innerHTML = visibleItems.map(item => {
+      const statusClass = String(item.status || 'Active').toLowerCase().includes('low') ? 'low' : String(item.status || 'Active').toLowerCase().includes('out') ? 'out' : 'active';
+      return `
+        <article class="inventory-card">
+          <div class="inventory-card-media">
+            <img src="${item.image || 'productImage.webp'}" alt="${item.name}">
           </div>
-          <button class="btn" data-edit-product="${item.slug}" type="button">Edit</button>
-          <button class="btn danger" data-remove-product="${item.slug}" type="button">Remove</button>
-        </div>
-      </article>
-    `).join('');
+          <div class="inventory-card-top">
+            <span class="inventory-tag">${item.cat || 'General'}</span>
+            <span class="inventory-status ${statusClass}">${item.status || 'Active'}</span>
+          </div>
+          <div>
+            <div class="inventory-name">${item.name}</div>
+            <div class="inventory-brand">${item.brand || 'Oriflame'}</div>
+            <div class="inventory-meta">${item.price || 'Rs. 0'} • Stock: ${item.stock || 0}</div>
+          </div>
+          <div class="inventory-actions">
+            <div class="inventory-qty-row">
+              <input class="input" data-stock-input="${item.slug}" type="number" min="0" value="${item.stock || 0}">
+              <button class="btn" data-stock-save="${item.slug}" type="button">Update</button>
+            </div>
+            <div class="inventory-actions-inline">
+              <button class="btn" data-edit-product="${item.slug}" type="button">Edit</button>
+              <button class="btn danger" data-remove-product="${item.slug}" type="button">Remove</button>
+            </div>
+          </div>
+        </article>
+      `;
+    }).join('');
   }
   function renderCustomers(){
     const map = new Map();
@@ -1399,7 +2069,9 @@
   }
 
   const todayText = document.getElementById('todayText');
+  const welcomeName = document.getElementById('welcomeName');
   if (todayText) todayText.textContent = new Date().toLocaleString('en-LK', {dateStyle:'medium', timeStyle:'short'});
+  updateUserGreeting(loadAdminAuthSession());
   const issueBillBtn = document.getElementById('issueBillBtn');
   const printBillBtn = document.getElementById('printBillBtn');
   const billingOrderSelect = document.getElementById('billingOrderSelect');
@@ -1410,24 +2082,139 @@
     const preview = document.getElementById('billPreview');
     if (order && preview) preview.innerHTML = createBillPreview(order);
   });
-  document.getElementById('adminLockForm').addEventListener('submit', e => {
+  document.getElementById('adminLockForm').addEventListener('submit', async e => {
     e.preventDefault();
-    const pin = document.getElementById('adminPin').value.trim();
+    const email = document.getElementById('adminEmail').value.trim();
+    const password = document.getElementById('adminPassword').value;
     const error = document.getElementById('adminLockError');
-    if (pin === ADMIN_PIN) {
-      error.classList.remove('active');
+    error.classList.remove('active');
+    try {
+      const session = await loginWithSupabase(email, password);
+      const isAdmin = await checkAdminAccess(session);
+      if (!isAdmin) {
+        persistAdminAuthSession(null);
+        error.textContent = 'This account does not have admin access.';
+        error.classList.add('active');
+        return;
+      }
+      persistAdminAuthSession(session);
+      updateUserGreeting(session);
       e.target.reset();
       unlockAdmin();
-      return;
+    } catch (loginError) {
+      persistAdminAuthSession(null);
+      error.textContent = loginError.message || 'Incorrect email or password. Please try again.';
+      error.classList.add('active');
     }
-    error.classList.add('active');
   });
-  document.getElementById('adminLogoutBtn').addEventListener('click', () => {
-    sessionStorage.removeItem(ADMIN_SESSION_KEY);
-    document.body.classList.add('admin-locked');
-    document.getElementById('adminPin').focus();
+  document.getElementById('adminLogoutBtn').addEventListener('click', async () => {
+    try {
+      const session = loadAdminAuthSession();
+      if (session) {
+        await fetch(`${SUPABASE_URL}/auth/v1/logout`, {
+          method: 'POST',
+          headers: adminHeaders()
+        });
+      }
+    } catch (error) {}
+    persistAdminAuthSession(null);
+    lockAdmin();
+    const emailInput = document.getElementById('adminEmail');
+    if (emailInput) emailInput.focus();
   });
   setupSelects();
+  function parseProductOptions(value){
+    return String(value || '').split(/\r?\n/).reduce((result, line) => {
+      const parts = line.split(':');
+      const label = (parts.shift() || '').trim();
+      const values = parts.join(':').split('|').map(item => item.trim()).filter(Boolean);
+      if (label && values.length) result[label] = values;
+      return result;
+    }, {});
+  }
+  function formatProductOptions(options){
+    if (!options || typeof options !== 'object') return '';
+    return Object.entries(options).map(([label, values]) => `${label}: ${Array.isArray(values) ? values.join(' | ') : values}`).join('\n');
+  }
+  function openProductModal(item = null){
+    const modal = document.getElementById('productModal');
+    const form = document.getElementById('inventoryProductModalForm');
+    const modalTitle = document.getElementById('productModalTitle');
+    const saveBtn = document.getElementById('saveProductModalBtn');
+    if (!modal || !form) return;
+    form.reset();
+    const categorySelect = document.getElementById('inventoryCategory');
+    const statusSelect = document.getElementById('inventoryStatus');
+    const slugInput = document.getElementById('inventoryEditSlug');
+    if (categorySelect) {
+      categorySelect.innerHTML = getCategories().map(category => `<option value="${category.name}">${category.name}</option>`).join('');
+    }
+    if (item) {
+      slugInput.value = item.slug || '';
+      document.getElementById('inventoryProductName').value = item.name || '';
+      document.getElementById('inventoryBrand').value = item.brand || '';
+      document.getElementById('inventoryCategory').value = item.cat || getCategories()[0]?.name || 'Skincare';
+      document.getElementById('inventoryPrice').value = item.price || '';
+      document.getElementById('inventoryStock').value = item.stock || 0;
+      document.getElementById('inventoryImage').value = item.image || '';
+      document.getElementById('inventoryImages').value = (item.images || []).filter(image => image !== item.image).join('\n');
+      document.getElementById('inventoryOptions').value = formatProductOptions(item.options);
+      document.getElementById('inventoryStatus').value = item.status || 'Active';
+      if (modalTitle) modalTitle.textContent = 'Edit product';
+      if (saveBtn) saveBtn.textContent = 'Update item';
+    } else {
+      slugInput.value = '';
+      document.getElementById('inventoryProductName').value = '';
+      document.getElementById('inventoryBrand').value = '';
+      document.getElementById('inventoryCategory').value = getCategories()[0]?.name || 'Skincare';
+      document.getElementById('inventoryPrice').value = '';
+      document.getElementById('inventoryStock').value = 10;
+      document.getElementById('inventoryImage').value = 'productImage.webp';
+      document.getElementById('inventoryImages').value = '';
+      document.getElementById('inventoryOptions').value = '';
+      document.getElementById('inventoryStatus').value = 'Active';
+      if (modalTitle) modalTitle.textContent = 'Add product';
+      if (saveBtn) saveBtn.textContent = 'Save item';
+    }
+    modal.classList.add('show');
+    modal.setAttribute('aria-hidden', 'false');
+    setTimeout(() => {
+      const firstField = document.getElementById('inventoryProductName');
+      if (firstField) firstField.focus();
+    }, 40);
+  }
+  function closeProductModal(){
+    const modal = document.getElementById('productModal');
+    if (!modal) return;
+    modal.classList.remove('show');
+    modal.setAttribute('aria-hidden', 'true');
+    const form = document.getElementById('inventoryProductModalForm');
+    if (form) form.reset();
+  }
+  function openCategoryModal(item = null){
+    const modal = document.getElementById('categoryModal');
+    const form = document.getElementById('categoryForm');
+    const title = document.getElementById('categoryModalTitle');
+    const saveBtn = document.getElementById('saveCategoryBtn');
+    if (!modal || !form) return;
+    form.reset();
+    document.getElementById('categoryEditId').value = item ? item.id || '' : '';
+    document.getElementById('categoryName').value = item ? item.name || '' : '';
+    document.getElementById('categoryDescription').value = item ? item.description || '' : '';
+    if (title) title.textContent = item ? 'Edit category' : 'Add category';
+    if (saveBtn) saveBtn.textContent = item ? 'Update category' : 'Save category';
+    modal.classList.add('show');
+    modal.setAttribute('aria-hidden', 'false');
+    setTimeout(() => document.getElementById('categoryName')?.focus(), 40);
+  }
+  function closeCategoryModal(){
+    const modal = document.getElementById('categoryModal');
+    if (!modal) return;
+    modal.classList.remove('show');
+    modal.setAttribute('aria-hidden', 'true');
+    const form = document.getElementById('categoryForm');
+    if (form) form.reset();
+  }
   document.querySelectorAll('.side-link').forEach(link => {
     link.addEventListener('click', () => {
       document.querySelectorAll('.side-link').forEach(item => item.classList.remove('active'));
@@ -1440,6 +2227,32 @@
   ['orderSearch', 'statusFilter', 'ownerFilter'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('input', renderOrders);
+  });
+  const inventorySearch = document.getElementById('inventorySearch');
+  const inventoryCategoryFilter = document.getElementById('inventoryCategoryFilter');
+  if (inventorySearch) inventorySearch.addEventListener('input', renderInventory);
+  if (inventoryCategoryFilter) inventoryCategoryFilter.addEventListener('change', renderInventory);
+  const newProductBtn = document.getElementById('newProductBtn');
+  const quickAddProductBtn = document.getElementById('quickAddProductBtn');
+  const newCategoryBtn = document.getElementById('newCategoryBtn');
+  if (newProductBtn) newProductBtn.addEventListener('click', () => openProductModal());
+  if (quickAddProductBtn) quickAddProductBtn.addEventListener('click', () => openProductModal());
+  if (newCategoryBtn) newCategoryBtn.addEventListener('click', () => openCategoryModal());
+  const closeProductModalBtn = document.getElementById('closeProductModalBtn');
+  const cancelProductModalBtn = document.getElementById('cancelProductModalBtn');
+  if (closeProductModalBtn) closeProductModalBtn.addEventListener('click', closeProductModal);
+  if (cancelProductModalBtn) cancelProductModalBtn.addEventListener('click', closeProductModal);
+  const productModal = document.getElementById('productModal');
+  if (productModal) productModal.addEventListener('click', (event) => {
+    if (event.target.id === 'productModal') closeProductModal();
+  });
+  const closeCategoryModalBtn = document.getElementById('closeCategoryModalBtn');
+  const cancelCategoryModalBtn = document.getElementById('cancelCategoryModalBtn');
+  const categoryModal = document.getElementById('categoryModal');
+  if (closeCategoryModalBtn) closeCategoryModalBtn.addEventListener('click', closeCategoryModal);
+  if (cancelCategoryModalBtn) cancelCategoryModalBtn.addEventListener('click', closeCategoryModal);
+  if (categoryModal) categoryModal.addEventListener('click', (event) => {
+    if (event.target.id === 'categoryModal') closeCategoryModal();
   });
   document.body.addEventListener('click', e => {
     const statusBtn = e.target.closest('[data-order-status]');
@@ -1478,6 +2291,7 @@
       const order = getOrders().find(item => item.id === removeOrder.dataset.removeOrder);
       if (!order) return;
       if (!confirmRemoval('order', `${order.id} - ${order.customer?.name || 'Customer'}`)) return;
+      deletePersistedItem(ORDER_KEY, order.id, '/api/orders');
       saveOrders(getOrders().filter(item => item.id !== removeOrder.dataset.removeOrder));
       rerender();
     }
@@ -1489,15 +2303,7 @@
     if (editProduct) {
       const item = getInventory().find(product => product.slug === editProduct.dataset.editProduct);
       if (!item) return;
-      document.getElementById('editSlug').value = item.slug;
-      document.getElementById('pName').value = item.name;
-      document.getElementById('pBrand').value = item.brand;
-      document.getElementById('pCat').value = item.cat;
-      document.getElementById('pPrice').value = item.price;
-      document.getElementById('pStock').value = item.stock;
-      document.getElementById('pImage').value = item.image;
-      document.getElementById('pStatus').value = item.status;
-      document.getElementById('saveProductBtn').textContent = 'Update item';
+      openProductModal(item);
       document.querySelector('.side-link[data-view="inventory"]').click();
       window.scrollTo({top:0, behavior:'smooth'});
     }
@@ -1505,6 +2311,7 @@
       const item = getInventory().find(product => product.slug === removeProduct.dataset.removeProduct);
       if (!item) return;
       if (!confirmRemoval('product', `${item.name} (${item.slug})`)) return;
+      deletePersistedItem(INVENTORY_KEY, item.id, '/api/products');
       saveInventory(getInventory().filter(product => product.slug !== removeProduct.dataset.removeProduct));
       rerender();
     }
@@ -1529,6 +2336,7 @@
       const item = getHeroSlides().find(slide => slide.id === removeHero.dataset.removeHero);
       if (!item) return;
       if (!confirmRemoval('hero slide', `${item.title || 'Hero slide'}`)) return;
+      deletePersistedItem(HERO_KEY, item.id, '/api/hero');
       saveHeroSlides(getHeroSlides().filter(slide => slide.id !== removeHero.dataset.removeHero));
       rerender();
     }
@@ -1548,6 +2356,7 @@
       const item = getDiscounts().find(code => code.id === removeDiscount.dataset.removeDiscount);
       if (!item) return;
       if (!confirmRemoval('discount code', `${item.code || 'Code'} (${item.title || 'Discount'})`)) return;
+      deletePersistedItem(DISCOUNT_KEY, item.id, '/api/discounts');
       saveDiscounts(getDiscounts().filter(code => code.id !== removeDiscount.dataset.removeDiscount));
       rerender();
     }
@@ -1557,13 +2366,13 @@
       document.getElementById('categoryEditId').value = item.id;
       document.getElementById('categoryName').value = item.name || '';
       document.getElementById('categoryDescription').value = item.description || '';
-      document.getElementById('saveCategoryBtn').textContent = 'Update category';
-      document.querySelector('.side-link[data-view="marketing"]').click();
+      openCategoryModal(item);
     }
     if (removeCategory) {
       const item = getCategories().find(cat => cat.id === removeCategory.dataset.removeCategory);
       if (!item) return;
       if (!confirmRemoval('category', `${item.name || 'Category'} (${item.id})`)) return;
+      deletePersistedItem(CATEGORIES_KEY, item.id, '/api/categories');
       saveCategories(getCategories().filter(cat => cat.id !== removeCategory.dataset.removeCategory));
       setupSelects();
       rerender();
@@ -1680,11 +2489,11 @@
   }
   document.getElementById('heroProduct').addEventListener('change', applyHeroProductSelection);
   document.getElementById('heroForm').addEventListener('input', refreshHeroPreview);
-  document.getElementById('heroForm').addEventListener('submit', e => {
+  document.getElementById('heroForm').addEventListener('submit', async e => {
     e.preventDefault();
     const items = getHeroSlides();
     const hero = {
-      id: document.getElementById('heroEditId').value || `hero-${Date.now()}`,
+      id: document.getElementById('heroEditId').value || generateUuid(),
       productSlug: document.getElementById('heroProduct').value || '',
       eyebrow: document.getElementById('heroEyebrow').value.trim(),
       title: document.getElementById('heroTitle').value.trim(),
@@ -1696,7 +2505,12 @@
       href: document.getElementById('heroHref').value.trim() || 'index.html'
     };
     const next = document.getElementById('heroEditId').value ? items.map(item => item.id === hero.id ? hero : item) : [hero, ...items];
-    saveHeroSlides(next);
+    try {
+      await saveHeroSlides(next);
+    } catch (error) {
+      alert(`Hero slide could not be saved: ${error.message}`);
+      return;
+    }
     e.target.reset();
     document.getElementById('heroEditId').value = '';
     document.getElementById('heroProduct').value = '';
@@ -1709,7 +2523,7 @@
     e.preventDefault();
     const items = getDiscounts();
     const code = {
-      id: document.getElementById('discountEditId').value || `disc-${Date.now()}`,
+      id: document.getElementById('discountEditId').value || generateUuid(),
       code: document.getElementById('discountCode').value.trim().toUpperCase(),
       title: document.getElementById('discountTitle').value.trim(),
       type: document.getElementById('discountType').value,
@@ -1737,6 +2551,7 @@
     e.target.reset();
     document.getElementById('categoryEditId').value = '';
     document.getElementById('saveCategoryBtn').textContent = 'Save category';
+    closeCategoryModal();
     rerender();
   });
   document.getElementById('productForm').addEventListener('submit', e => {
@@ -1759,9 +2574,39 @@
     document.getElementById('saveProductBtn').textContent = 'Save item';
     rerender();
   });
+  document.getElementById('inventoryProductModalForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const editing = document.getElementById('inventoryEditSlug').value;
+    const existing = editing ? getInventory().find(product => product.slug === editing) : null;
+    const item = {
+      id: existing?.id,
+      slug: editing || slugify(document.getElementById('inventoryProductName').value),
+      name: document.getElementById('inventoryProductName').value.trim(),
+      brand: document.getElementById('inventoryBrand').value.trim(),
+      cat: document.getElementById('inventoryCategory').value,
+      price: document.getElementById('inventoryPrice').value.trim(),
+      stock: Number(document.getElementById('inventoryStock').value),
+      image: document.getElementById('inventoryImage').value.trim(),
+      images: [document.getElementById('inventoryImage').value.trim(), ...document.getElementById('inventoryImages').value.split(/\r?\n/).map(item => item.trim()).filter(Boolean)],
+      options: parseProductOptions(document.getElementById('inventoryOptions').value),
+      status: document.getElementById('inventoryStatus').value
+    };
+    if (!item.name || !item.brand || !item.price || !item.image) {
+      alert('Please fill in all product fields before saving.');
+      return;
+    }
+    const inventory = getInventory();
+    try {
+      await saveInventory(editing ? inventory.map(product => product.slug === editing ? item : product) : [item, ...inventory]);
+      closeProductModal();
+      rerender();
+    } catch {
+      // The save function already shows the database error.
+    }
+  });
   document.getElementById('resetInventoryBtn').addEventListener('click', () => {
     saveInventory([]);
-    localStorage.setItem(INVENTORY_VERSION_KEY, INVENTORY_VERSION);
+    write(INVENTORY_VERSION_KEY, INVENTORY_VERSION);
     rerender();
   });
   rerender();

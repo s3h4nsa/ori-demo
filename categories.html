@@ -6,6 +6,7 @@
   <title>Categories — Oriflame LK</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="site-header.css">
   <style>
     :root{
       --bg:#ffffff;
@@ -47,6 +48,7 @@
     .topnav .wrap{display:flex; align-items:center; justify-content:space-between; height:78px;}
     .brand{display:flex; align-items:center; gap:10px; font-weight:800; font-size:20px; letter-spacing:-.02em;}
     .brand .dot{width:10px; height:10px; border-radius:50%; background:linear-gradient(135deg,var(--green-a),var(--green-b));}
+    .brand-logo{display:block; width:auto; height:28px; object-fit:contain;}
     .brand-lk{
       font-size:10px; font-weight:800; background:var(--black); color:#fff;
       padding:2px 6px; border-radius:5px; margin-left:2px; letter-spacing:.03em;
@@ -197,7 +199,7 @@
 <body>
   <header class="topnav">
     <div class="wrap">
-      <a href="index.html" class="brand"><span class="dot"></span>ORIFLAME<span class="brand-lk">LK</span></a>
+      <a href="index.html" class="brand" aria-label="Oriflame LK home"><img src="assets/logo-placeholder.png" alt="Oriflame LK" class="brand-logo"></a>
       <nav class="nav-links">
         <a href="categories.html" class="active">Categories</a>
         <a href="index.html#new-arrivals">New arrivals</a>
@@ -254,20 +256,66 @@
     const INVENTORY_KEY = 'oriflameInventory';
     const CART_KEY = 'oriflameCart';
     const CATEGORY_KEY = 'oriflameCategories';
-    function getCategoryList(){
+    const SUPABASE_URL = 'https://nhehzncyhcditfrrcnag.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_7ukY5lsqHvHiofPtiXg9_Q_gYjNKmZL';
+
+    async function fetchSupabaseTable(table, fallback = []){
       try {
-        const saved = JSON.parse(localStorage.getItem(CATEGORY_KEY));
+        if (window.location.protocol !== 'file:') {
+          const apiResponse = await fetch(`/api/${table}`);
+          if (apiResponse.ok) {
+            const apiData = await apiResponse.json();
+            if (Array.isArray(apiData)) return apiData;
+          }
+        }
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?select=*`, {
+          headers: {
+            apikey: SUPABASE_KEY,
+            Authorization: 'Bearer ' + SUPABASE_KEY,
+            Accept: 'application/json'
+          }
+        });
+        if (!response.ok) return fallback;
+        const data = await response.json();
+        return Array.isArray(data) ? data : fallback;
+      } catch {
+        return fallback;
+      }
+    }
+    async function getCategoryList(){
+      const supabaseCategories = await fetchSupabaseTable('categories', []);
+      if (supabaseCategories.length) {
+        try { window.sessionStorage.setItem(CATEGORY_KEY, JSON.stringify(supabaseCategories)); } catch {}
+        return supabaseCategories;
+      }
+      try {
+        const storage = window.sessionStorage || window.localStorage;
+        const saved = JSON.parse(storage.getItem(CATEGORY_KEY));
         return Array.isArray(saved) ? saved : [];
       } catch {
         return [];
       }
     }
-    let CATEGORY_LIST = getCategoryList().map(cat => cat.name);
+    let CATEGORY_LIST = [];
 
-    function getInventoryCatalog(){
+    async function getInventoryCatalog(){
+      const categoryRows = await fetchSupabaseTable('categories', []);
+      const categoryLookup = {};
+      categoryRows.forEach(category => {
+        if (!category || !category.id) return;
+        categoryLookup[String(category.id)] = category.name || category.slug || 'Skincare';
+        if (category.slug) categoryLookup[String(category.slug)] = category.name || category.slug;
+      });
+      const supabaseCatalog = await fetchSupabaseTable('products', []);
+      if (supabaseCatalog.length) {
+        const normalized = supabaseCatalog.map(item => normalizeProduct(item, categoryLookup));
+        try { window.sessionStorage.setItem(INVENTORY_KEY, JSON.stringify(normalized)); } catch {}
+        return normalized;
+      }
       try {
-        const saved = JSON.parse(localStorage.getItem(INVENTORY_KEY));
-        if (Array.isArray(saved)) return saved;
+        const storage = window.sessionStorage || window.localStorage;
+        const saved = JSON.parse(storage.getItem(INVENTORY_KEY));
+        if (Array.isArray(saved)) return saved.map(item => normalizeProduct(item, categoryLookup));
       } catch {}
       return [];
     }
@@ -275,30 +323,62 @@
       try { return JSON.parse(localStorage.getItem(CART_KEY)) || []; }
       catch { return []; }
     }
-    function saveCart(cart){ localStorage.setItem(CART_KEY, JSON.stringify(cart)); }
-    function normalizeProduct(item){
+    function saveCart(cart){
+      localStorage.setItem(CART_KEY, JSON.stringify(cart));
+      window.dispatchEvent(new CustomEvent('oriflame:cart-updated'));
+    }
+    function normalizeProduct(item, categoryLookup = {}){
       const stock = Number(item.stock || 0);
-      const status = item.status || (stock <= 0 ? 'Out of stock' : 'Active');
+      const rawStatus = String(item.status || '').trim().toLowerCase();
+      const status = rawStatus === 'hidden' ? 'Hidden'
+        : rawStatus === 'out_of_stock' || rawStatus === 'out of stock' ? 'Out of stock'
+        : rawStatus === 'low_stock' || rawStatus === 'low stock' ? 'Low stock'
+        : stock <= 0 ? 'Out of stock' : 'Active';
+      const categoryName = item.cat || item.category_name || item.category || categoryLookup[String(item.category_id)] || categoryLookup[String(item.categoryId)] || 'Skincare';
+      const numericPrice = Number(item.price || 0);
       return {
         ...item,
         stock,
         brand:item.brand || 'Oriflame LK',
         name:item.name || 'Product',
-        cat:item.cat || 'Skincare',
-        price:item.price || 'Rs. 0',
-        image:item.image || 'productImage.webp',
-        tag: status === 'Out of stock' ? 'OUT OF STOCK' : item.tag || null,
+        cat: categoryName,
+        price: Number.isFinite(numericPrice) && numericPrice >= 0 ? `Rs. ${numericPrice.toLocaleString('en-US')}` : (item.price || 'Rs. 0'),
+        image:item.image || item.image_url || 'productImage.webp',
+        tag: status === 'Out of stock' ? 'OUT OF STOCK' : status === 'Low stock' ? 'LOW STOCK' : item.tag || null,
         status
       };
     }
 
-    const catalog = getInventoryCatalog().map(normalizeProduct).filter(item => item.status !== 'Hidden');
+    let catalog = [];
 
+    async function bootCategories(){
+      const categories = await getCategoryList();
+      CATEGORY_LIST = categories.map(cat => cat.name).filter(Boolean);
+      catalog = (await getInventoryCatalog()).map(item => normalizeProduct(item)).filter(item => item.status !== 'Hidden');
+      const selected = getSelectedCategory();
+      if (selected) {
+        renderCategoryGrid(selected);
+        renderSections(selected);
+      } else {
+        renderCategoryGrid();
+        renderSections();
+      }
+      updateBagCount();
+    }
+
+    function normalizeCategoryName(value){
+      return String(value || '').trim();
+    }
+    function categoryMatches(a, b){
+      return normalizeCategoryName(a).toLowerCase() === normalizeCategoryName(b).toLowerCase();
+    }
     function getSelectedCategory(){
       if (!CATEGORY_LIST.length) return null;
       const params = new URLSearchParams(window.location.search);
       const cat = params.get('cat');
-      return CATEGORY_LIST.includes(cat) ? cat : CATEGORY_LIST[0];
+      if (!cat) return CATEGORY_LIST[0];
+      const match = CATEGORY_LIST.find(item => categoryMatches(item, cat));
+      return match || CATEGORY_LIST[0];
     }
 
     function getAvailableStock(slug){
@@ -325,10 +405,12 @@
         document.getElementById('categoryGrid').innerHTML = '<div class="empty-state">No categories added yet. Create categories in the admin panel to populate this page.</div>';
         return;
       }
+      const normalizedActive = normalizeCategoryName(activeCat);
       const html = CATEGORY_LIST.map(cat => {
-        const count = catalog.filter(item => item.cat === cat).length;
+        const active = normalizedActive && categoryMatches(cat, normalizedActive);
+        const count = catalog.filter(item => categoryMatches(item.cat, cat)).length;
         return `
-          <button class="category-card ${activeCat === cat ? 'active' : ''}" data-cat="${cat}" type="button">
+          <button class="category-card ${active ? 'active' : ''}" data-cat="${cat}" type="button">
             <div class="label">Shop now</div>
             <div>
               <h3>${cat}</h3>
@@ -371,7 +453,7 @@
         document.getElementById('categorySections').innerHTML = '<div class="empty-state">No categories or products are available yet. Add them from the admin panel.</div>';
         return;
       }
-      const items = catalog.filter(item => item.cat === cat);
+      const items = catalog.filter(item => categoryMatches(item.cat, cat));
       const sectionCards = items.length
         ? items.map(productCard).join('')
         : '<div class="empty-state">No products in this category yet — check back soon.</div>';
@@ -442,25 +524,26 @@
       }
     });
 
-    window.addEventListener('popstate', () => {
+    window.addEventListener('popstate', async () => {
       const selected = getSelectedCategory();
       renderCategoryGrid(selected);
       renderSections(selected);
     });
 
-    window.addEventListener('storage', (event) => {
+    window.addEventListener('storage', async (event) => {
       if (event.key === INVENTORY_KEY || event.key === CATEGORY_KEY) {
-        CATEGORY_LIST = getCategoryList().map(cat => cat.name);
+        const categories = await getCategoryList();
+        CATEGORY_LIST = categories.map(cat => cat.name).filter(Boolean);
         const selected = getSelectedCategory();
+        catalog = (await getInventoryCatalog()).map(normalizeProduct).filter(item => item.status !== 'Hidden');
         renderCategoryGrid(selected);
         renderSections(selected);
       }
     });
 
     updateBagCount();
-    const initial = getSelectedCategory();
-    renderCategoryGrid(initial);
-    renderSections(initial);
+    bootCategories();
   </script>
+  <script src="site-header.js"></script>
 </body>
 </html>

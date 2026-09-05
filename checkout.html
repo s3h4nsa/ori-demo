@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Oriflame — Checkout</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site-header.css">
 <style>
   :root{
     --bg:#ffffff;
@@ -253,7 +254,7 @@
 <body>
 
   <div class="topbar">
-    <div class="brand"><img src="assets/logo-placeholder.png" alt="Oriflame LK" class="brand-logo"></div>
+    <a class="brand" href="index.html" aria-label="Go to homepage"><img src="assets/logo-placeholder.png" alt="Oriflame LK" class="brand-logo"></a>
     <div class="cart-icon">
       <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
     </div>
@@ -434,7 +435,10 @@
 
   // Helpers for storage
   function getInventoryCatalog(){
-    try { return JSON.parse(localStorage.getItem(INVENTORY_KEY)) || []; } catch { return []; }
+    try {
+      const storage = window.sessionStorage || window.localStorage;
+      return JSON.parse(storage.getItem(INVENTORY_KEY)) || [];
+    } catch { return []; }
   }
   function normalizeProduct(item){
     const status = item.status || (Number(item.stock) <= 0 ? 'Out of stock' : 'Active');
@@ -453,7 +457,10 @@
   function refreshProducts(){ products = getInventoryCatalog().map(normalizeProduct).filter(p => p.status !== 'Hidden'); }
 
   function getCart(){ try { return JSON.parse(localStorage.getItem(CART_KEY)) || []; } catch { return []; } }
-  function saveCart(cart){ localStorage.setItem(CART_KEY, JSON.stringify(cart)); }
+  function saveCart(cart){
+    localStorage.setItem(CART_KEY, JSON.stringify(cart));
+    window.dispatchEvent(new CustomEvent('oriflame:cart-updated'));
+  }
   function getOrders(){ try { return JSON.parse(localStorage.getItem(ORDER_KEY)) || []; } catch { return []; } }
   function saveOrders(list){ localStorage.setItem(ORDER_KEY, JSON.stringify(list)); }
 
@@ -513,7 +520,7 @@
           <div style="min-width:0">
             <div style="font-size:11.5px;color:var(--text-dim);font-weight:700;letter-spacing:.2px;">${l.product.brand}</div>
             <div style="font-weight:700;color:var(--text);margin-top:2px;">${l.product.name}</div>
-            <div style="font-size:12.5px;color:var(--text-dim);margin-top:5px">Qty: ${l.qty} ${l.product.tag ? '· ' + l.product.tag : ''}</div>
+            <div style="font-size:12.5px;color:var(--text-dim);margin-top:5px">Qty: ${l.qty} ${l.product.tag ? '· ' + l.product.tag : ''} ${l.options && Object.keys(l.options).length ? '· ' + Object.entries(l.options).map(([name, value]) => `${name}: ${value}`).join(' · ') : ''}</div>
           </div>
         </div>
         <div style="font-weight:700;color:var(--text);white-space:nowrap;">${money(priceNumber(l.product.price) * l.qty)}</div>
@@ -610,7 +617,7 @@
         postalCode: document.getElementById('fPostal')?.value.trim(),
         country: document.getElementById('fCountry')?.value.trim() || 'Sri Lanka'
       },
-      items: cLines.map(l => ({ slug: l.slug, qty: l.qty, name: l.product.name, price: l.product.price })),
+      items: cLines.map(l => ({ slug: l.slug, qty: l.qty, name: l.product.name, price: l.product.price, options: l.options || {} })),
       total: summary.total,
       payment: {
         method: paymentMethod,
@@ -667,5 +674,6 @@
   })();
 </script>
 
+  <script src="site-header.js"></script>
 </body>
 </html>
